@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>RCC Registration System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --primary:#007bff; --bg:#f0f2f5; --card:#fff; --text:#222; --muted:#666;
+      --success:#28a745; --danger:#dc3545;
+    }
+    body { font-family:'Segoe UI', Arial, sans-serif; background:var(--bg); color:var(--text); margin:0; padding:24px; }
+    h2 { background:var(--primary); color:#fff; padding:10px 12px; border-radius:6px; margin:28px auto 12px; max-width:900px; }
+    .section { background:var(--card); padding:16px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.08); margin:0 auto 20px; max-width:900px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    label { font-weight:600; margin-top:8px; display:block; }
+    input, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-top:6px; }
+    .btn { display:inline-block; padding:10px 14px; border:none; border-radius:6px; cursor:pointer; color:#fff; background:var(--success); margin-top:12px; }
+    .btn.secondary { background:var(--primary); }
+    .btn.danger { background:var(--danger); }
+    .hidden { display:none; }
+    .member-block { border:1px solid #e5e5e5; padding:12px; border-radius:6px; background:#fafafa; margin-top:12px; }
+    #loginForm, #rccForm { max-width:600px; margin:0 auto; }
+    .bar { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+    .muted { color:var(--muted); font-size:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <h2>Login</h2>
+  <div class="section" id="loginSection">
+    <form id="loginForm">
+      <label>Username</label>
+      <input type="text" id="username" required />
+      <label>Email</label>
+      <input type="email" id="email" required />
+      <label>Password</label>
+      <input type="password" id="password" required />
+      <div class="bar">
+        <button type="submit" class="btn">Login</button>
+        <span class="muted">Your credentials are verified against the login sheet.</span>
+      </div>
+    </form>
+  </div>
+
+  <!-- RCC DETAILS -->
+  <div id="app" class="hidden">
+    <h2>RCC Details</h2>
+    <div class="section">
+      <div class="grid">
+        <div>
+          <label>Zone</label>
+          <select id="zone"></select>
+        </div>
+        <div>
+          <label>Province</label>
+          <select id="province"></select>
+        </div>
+        <div>
+          <label>District</label>
+          <select id="district"></select>
+        </div>
+        <div>
+          <label>Area</label>
+          <select id="area"></select>
+        </div>
+      </div>
+      <div id="newAreaDiv" class="hidden" style="margin-top:12px;">
+        <label>New area name</label>
+        <input type="text" id="newAreaName" placeholder="Enter new area" />
+      </div>
+    </div>
+
+    <!-- PRESIDENT -->
+    <h2>President details</h2>
+    <div class="section">
+      <div class="grid">
+        <div><label>Full name</label><input id="president_name" /></div>
+        <div><label>Contact No</label><input id="president_contact" /></div>
+        <div><label>Whatsapp No</label><input id="president_whatsapp" /></div>
+        <div>
+          <label>Marital status</label>
+          <select id="president_marital"><option>Single</option><option>Married</option></select>
+        </div>
+        <div><label>Status</label><input id="president_status" /></div>
+      </div>
+    </div>
+
+    <!-- SECRETARY -->
+    <h2>Secretary details</h2>
+    <div class="section">
+      <div class="grid">
+        <div><label>Full name</label><input id="secretary_name" /></div>
+        <div><label>Contact No</label><input id="secretary_contact" /></div>
+        <div><label>Whatsapp No</label><input id="secretary_whatsapp" /></div>
+        <div>
+          <label>Marital status</label>
+          <select id="secretary_marital"><option>Single</option><option>Married</option></select>
+        </div>
+        <div><label>Status</label><input id="secretary_status" /></div>
+      </div>
+    </div>
+
+    <!-- TREASURER -->
+    <h2>Treasurer details</h2>
+    <div class="section">
+      <div class="grid">
+        <div><label>Full name</label><input id="treasurer_name" /></div>
+        <div><label>Contact No</label><input id="treasurer_contact" /></div>
+        <div><label>Whatsapp No</label><input id="treasurer_whatsapp" /></div>
+        <div>
+          <label>Marital status</label>
+          <select id="treasurer_marital"><option>Single</option><option>Married</option></select>
+        </div>
+        <div><label>Status</label><input id="treasurer_status" /></div>
+      </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <h2>Member details</h2>
+    <div class="section" id="members"></div>
+    <div class="section">
+      <button class="btn secondary" type="button" id="addMemberBtn">Add member</button>
+    </div>
+
+    <!-- COORDINATOR -->
+    <h2>Coordinator</h2>
+    <div class="section">
+      <label>Select coordinator</label>
+      <select id="coordinator">
+        <option value="President">President</option>
+        <option value="Secretary">Secretary</option>
+        <option value="Treasurer">Treasurer</option>
+        <option value="Member">Member</option>
+      </select>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="section">
+      <button class="btn" type="button" id="submitBtn">Submit</button>
+      <span id="status" class="muted" style="margin-left:10px;"></span>
+    </div>
+  </div>
+
+  <script>
+    // Replace with your deployed Apps Script Web App URL
+    const API_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL";
+
+    let dropdowns = { zones: [], provinces: {}, districts: {}, areas: [] };
+    let memberCount = 0;
+
+    // --- Helpers ---
+    const postJSON = async (payload) => {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      return res.json();
+    };
+
+    const populateSelect = (id, options) => {
+      const el = document.getElementById(id);
+      el.innerHTML = "";
+      (options || []).forEach(opt => {
+        const o = document.createElement("option");
+        o.value = opt; o.textContent = opt;
+        el.appendChild(o);
+      });
+    };
+
+    const clearMembers = () => {
+      document.getElementById("members").innerHTML = "";
+      memberCount = 0;
+    };
+
+    const addMember = (existing = {}) => {
+      memberCount++;
+      const wrap = document.createElement("div");
+      wrap.className = "member-block";
+      wrap.dataset.index = String(memberCount);
+      wrap.innerHTML = `
+        <div class="grid">
+          <div><label>Full name</label><input value="${existing.name || ""}" class="m-name" /></div>
+          <div><label>Contact No</label><input value="${existing.contact || ""}" class="m-contact" /></div>
+          <div><label>Whatsapp No</label><input value="${existing.whatsapp || ""}" class="m-whatsapp" /></div>
+          <div>
+            <label>Marital status</label>
+            <select class="m-marital">
+              <option ${existing.marital === "Single" ? "selected" : ""}>Single</option>
+              <option ${existing.marital === "Married" ? "selected" : ""}>Married</option>
+            </select>
+          </div>
+          <div><label>Status</label><input value="${existing.status || ""}" class="m-status" /></div>
+        </div>
+        <button class="btn danger" type="button">Remove</button>
+      `;
+      wrap.querySelector(".btn.danger")?.addEventListener("click", () => wrap.remove());
+      document.getElementById("members").appendChild(wrap);
+    };
+
+    const collectMembers = () => {
+      const arr = [];
+      document.querySelectorAll("#members .member-block").forEach(block => {
+        arr.push({
+          name: block.querySelector(".m-name").value.trim(),
+          contact: block.querySelector(".m-contact").value.trim(),
+          whatsapp: block.querySelector(".m-whatsapp").value.trim(),
+          marital: block.querySelector(".m-marital").value,
+          status: block.querySelector(".m-status").value.trim(),
+        });
+      });
+      return arr;
+    };
+
+    const fillForm = (data) => {
+      document.getElementById("zone").value = data.Zone || "";
+      updateProvinces();
+      document.getElementById("province").value = data.Province || "";
+      updateDistricts();
+      document.getElementById("district").value = data.District || "";
+
+      document.getElementById("president_name").value = data["President Name"] || "";
+      document.getElementById("president_contact").value = data["President Contact"] || "";
+      document.getElementById("president_whatsapp").value = data["President WhatsApp"] || "";
+      document.getElementById("president_marital").value = data["President Marital"] || "";
+      document.getElementById("president_status").value = data["President Status"] || "";
+
+      document.getElementById("secretary_name").value = data["Secretary Name"] || "";
+      document.getElementById("secretary_contact").value = data["Secretary Contact"] || "";
+      document.getElementById("secretary_whatsapp").value = data["Secretary WhatsApp"] || "";
+      document.getElementById("secretary_marital").value = data["Secretary Marital"] || "";
+      document.getElementById("secretary_status").value = data["Secretary Status"] || "";
+
+      document.getElementById("treasurer_name").value = data["Treasurer Name"] || "";
+      document.getElementById("treasurer_contact").value = data["Treasurer Contact"] || "";
+      document.getElementById("treasurer_whatsapp").value = data["Treasurer WhatsApp"] || "";
+      document.getElementById("treasurer_marital").value = data["Treasurer Marital"] || "";
+      document.getElementById("treasurer_status").value = data["Treasurer Status"] || "";
+
+      document.getElementById("coordinator").value = data["Coordinator"] || "President";
+
+      clearMembers();
+      (data.members || []).forEach(m => addMember(m));
+    };
+
+    const clearForm = () => {
+      ["zone","province","district","newAreaName","president_name","president_contact","president_whatsapp","president_status",
+       "secretary_name","secretary_contact","secretary_whatsapp","secretary_status",
+       "treasurer_name","treasurer_contact","treasurer_whatsapp","treasurer_status"].forEach(id=>{
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = "";
+      });
+      ["president_marital","secretary_marital","treasurer_marital","coordinator"].forEach(id=>{
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.selectedIndex = 0;
+      });
+      clearMembers();
+    };
+
+    // --- Events ---
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = {
+        action: "login",
+        username: document.getElementById("username").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value,
+      };
+      const res = await postJSON(payload);
+      if (res.ok) {
+        document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("app").classList.remove("hidden");
+        await loadDropdowns();
+      } else {
+        alert(res.error || "Login failed");
+      }
+    });
+
+    async function loadDropdowns() {
+      const res = await postJSON({ action: "getDropdowns" });
+      if (!res.ok) return alert("Failed to load dropdowns");
+      dropdowns = res;
+      populateSelect("zone", res.zones);
+      populateSelect("area", res.areas);
+      updateProvinces(); // initialize province/district chain
+
+      document.getElementById("zone").addEventListener("change", updateProvinces);
+      document.getElementById("province").addEventListener("change", updateDistricts);
+      document.getElementById("area").addEventListener("change", handleAreaChange);
+      document.getElementById("addMemberBtn").addEventListener("click", () => addMember());
+      document.getElementById("submitBtn").addEventListener("click", submitForm);
+    }
+
+    function updateProvinces() {
+      const zone = document.getElementById("zone").value;
+      populateSelect("province", dropdowns.provinces[zone] || []);
+      updateDistricts();
+    }
+
+    function updateDistricts() {
+      const province = document.getElementById("province").value;
+      populateSelect("district", dropdowns.districts[province] || []);
+    }
+
+    async function handleAreaChange() {
+      const areaSel = document.getElementById("area").value;
+      const newDiv = document.getElementById("newAreaDiv");
+      if (areaSel === "New") {
+        newDiv.classList.remove("hidden");
+        clearForm();
+      } else {
+        newDiv.classList.add("hidden");
+        const res = await postJSON({ action: "getFormData", area: areaSel });
+        if (res.ok && res.data) {
+          fillForm(res.data);
+        } else {
+          clearForm();
+          document.getElementById("status").textContent = "No existing data for this area.";
+        }
+      }
+    }
+
+    async function submitForm() {
+      const areaSel = document.getElementById("area").value;
+      const areaName = areaSel === "New" ? document.getElementById("newAreaName").value.trim() : areaSel;
+      if (!areaName) return alert("Please enter a new area name.");
+
+      const formData = {
+        "Zone": document.getElementById("zone").value,
+        "Province": document.getElementById("province").value,
+        "District": document.getElementById("district").value,
+        "Area": areaName,
+        "President Name": document.getElementById("president_name").value.trim(),
+        "President Contact": document.getElementById("president_contact").value.trim(),
+        "President WhatsApp": document.getElementById("president_whatsapp").value.trim(),
+        "President Marital": document.getElementById("president_marital").value,
+        "President Status": document.getElementById("president_status").value.trim(),
+
+        "Secretary Name": document.getElementById("secretary_name").value.trim(),
+        "Secretary Contact": document.getElementById("secretary_contact").value.trim(),
+        "Secretary WhatsApp": document.getElementById("secretary_whatsapp").value.trim(),
+        "Secretary Marital": document.getElementById("secretary_marital").value,
+        "Secretary Status": document.getElementById("secretary_status").value.trim(),
+
+        "Treasurer Name": document.getElementById("treasurer_name").value.trim(),
+        "Treasurer Contact": document.getElementById("treasurer_contact").value.trim(),
+        "Treasurer WhatsApp": document.getElementById("treasurer_whatsapp").value.trim(),
+        "Treasurer Marital": document.getElementById("treasurer_marital").value,
+        "Treasurer Status": document.getElementById("treasurer_status").value.trim(),
+
+        "Coordinator": document.getElementById("coordinator").value,
+        members: collectMembers(),
+      };
+
+      document.getElementById("status").textContent = "Submitting...";
+      const res = await postJSON({ action: "submitForm", formData });
+      if (res.ok) {
+        document.getElementById("status").textContent = `Saved (${res.status}).`;
+        // Refresh areas in case a new area was added
+        const dd = await postJSON({ action: "getDropdowns" });
+        if (dd.ok) {
+          dropdowns = dd;
+          populateSelect("area", dd.areas);
+          document.getElementById("area").value = areaName;
+        }
+      } else {
+        document.getElementById("status").textContent = res.error || "Error saving.";
+      }
+    }
+  </script>
+</body>
+</html>
