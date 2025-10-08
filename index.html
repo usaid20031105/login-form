@@ -1,1 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RCC Registration</title>
+  <style>
+    :root { --primary:#0b5ed7; --success:#198754; --danger:#dc3545; --bg:#f4f6f9; --card:#fff; --muted:#6c757d; }
+    body{font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);margin:0;padding:20px;color:#222}
+    .center{max-width:980px;margin:0 auto}
+    h1{color:#fff;background:var(--primary);padding:12px;border-radius:8px;margin-bottom:18px}
+    .card{background:var(--card);padding:14px;border-radius:8px;box-shadow:0 6px 18px rgba(10,10,10,0.06);margin-bottom:18px}
+    label{display:block;font-weight:600;margin-top:10px}
+    input,select,textarea{width:100%;padding:9px;margin-top:6px;border-radius:6px;border:1px solid #ddd;box-sizing:border-box}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:7px;border:0;color:#fff;background:var(--success);cursor:pointer;margin-top:12px}
+    .btn.secondary{background:var(--primary)}
+    .btn.danger{background:var(--danger)}
+    .muted{color:var(--muted);font-size:13px;margin-left:8px}
+    .hidden{display:none}
+    .member-block{border:1px solid #eee;padding:10px;border-radius:8px;background:#fafafa;margin-top:12px}
+    .small{font-size:13px}
+    .photo-preview{max-width:140px;display:block;margin-top:8px;border-radius:6px}
+    .custom-input{margin-top:6px;padding:8px;border:1px solid #ddd;border-radius:6px}
+  </style>
+</head>
+<body>
+  <div class="center">
+    <h1>RCC Registration</h1>
 
+    <!-- LOGIN -->
+    <div id="loginCard" class="card">
+      <form id="loginForm">
+        <label>Username</label>
+        <input id="username" type="text" required />
+        <label>Email</label>
+        <input id="email" type="email" required />
+        <label>Password</label>
+        <input id="password" type="password" required />
+        <div style="margin-top:12px">
+          <button class="btn" type="submit">Login</button>
+          <span class="muted">Credentials checked against login sheet</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- APP -->
+    <div id="app" class="hidden">
+
+      <!-- AREA / LOCATION -->
+      <div class="card">
+        <div class="grid">
+          <div>
+            <label>Zone</label>
+            <select id="zone"></select>
+          </div>
+          <div>
+            <label>Province</label>
+            <select id="province"></select>
+          </div>
+          <div>
+            <label>District</label>
+            <select id="district"></select>
+          </div>
+          <div>
+            <label>Area</label>
+            <select id="area"></select>
+          </div>
+        </div>
+
+        <div id="newAreaDiv" class="hidden" style="margin-top:12px">
+          <label>New Area Name</label>
+          <input id="newAreaName" type="text" placeholder="Enter new area name" />
+        </div>
+      </div>
+
+      <!-- PRESIDENT -->
+      <div class="card">
+        <h3>President</h3>
+        <div class="grid">
+          <div>
+            <label>Full name</label>
+            <input id="president_name" />
+          </div>
+          <div>
+            <label>Contact No</label>
+            <input id="president_contact" />
+          </div>
+          <div>
+            <label>Whatsapp No</label>
+            <input id="president_whatsapp" />
+          </div>
+          <div>
+            <label>Marital status</label>
+            <select id="president_marital">
+              <option>Single</option><option>Married</option><option>Other</option>
+            </select>
+            <input id="president_marital_custom" class="custom-input hidden" placeholder="Enter custom marital status" />
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="president_status"><option>Active</option><option>Inactive</option><option>Other</option></select>
+            <input id="president_status_custom" class="custom-input hidden" placeholder="Enter custom status" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Photo option</label>
+          <select id="president_photo_mode"><option value="none">None</option><option value="upload">Upload Photo</option><option value="camera">Take Photo</option></select>
+          <input id="president_photo_file" class="hidden" type="file" accept="image/*" />
+          <button id="president_take_photo_btn" class="hidden btn secondary" type="button">Open Camera</button>
+          <img id="president_photo_preview" class="photo-preview" />
+          <canvas id="president_canvas" class="hidden"></canvas>
+        </div>
+      </div>
+
+      <!-- SECRETARY -->
+      <div class="card">
+        <h3>Secretary</h3>
+        <div class="grid">
+          <div>
+            <label>Full name</label>
+            <input id="secretary_name" />
+          </div>
+          <div>
+            <label>Contact No</label>
+            <input id="secretary_contact" />
+          </div>
+          <div>
+            <label>Whatsapp No</label>
+            <input id="secretary_whatsapp" />
+          </div>
+          <div>
+            <label>Marital status</label>
+            <select id="secretary_marital"><option>Single</option><option>Married</option><option>Other</option></select>
+            <input id="secretary_marital_custom" class="custom-input hidden" placeholder="Enter custom marital status" />
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="secretary_status"><option>Active</option><option>Inactive</option><option>Other</option></select>
+            <input id="secretary_status_custom" class="custom-input hidden" placeholder="Enter custom status" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Photo option</label>
+          <select id="secretary_photo_mode"><option value="none">None</option><option value="upload">Upload Photo</option><option value="camera">Take Photo</option></select>
+          <input id="secretary_photo_file" class="hidden" type="file" accept="image/*" />
+          <button id="secretary_take_photo_btn" class="hidden btn secondary" type="button">Open Camera</button>
+          <img id="secretary_photo_preview" class="photo-preview" />
+          <canvas id="secretary_canvas" class="hidden"></canvas>
+        </div>
+      </div>
+
+      <!-- TREASURER -->
+      <div class="card">
+        <h3>Treasurer</h3>
+        <div class="grid">
+          <div>
+            <label>Full name</label>
+            <input id="treasurer_name" />
+          </div>
+          <div>
+            <label>Contact No</label>
+            <input id="treasurer_contact" />
+          </div>
+          <div>
+            <label>Whatsapp No</label>
+            <input id="treasurer_whatsapp" />
+          </div>
+          <div>
+            <label>Marital status</label>
+            <select id="treasurer_marital"><option>Single</option><option>Married</option><option>Other</option></select>
+            <input id="treasurer_marital_custom" class="custom-input hidden" placeholder="Enter custom marital status" />
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="treasurer_status"><option>Active</option><option>Inactive</option><option>Other</option></select>
+            <input id="treasurer_status_custom" class="custom-input hidden" placeholder="Enter custom status" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Photo option</label>
+          <select id="treasurer_photo_mode"><option value="none">None</option><option value="upload">Upload Photo</option><option value="camera">Take Photo</option></select>
+          <input id="treasurer_photo_file" class="hidden" type="file" accept="image/*" />
+          <button id="treasurer_take_photo_btn" class="hidden btn secondary" type="button">Open Camera</button>
+          <img id="treasurer_photo_preview" class="photo-preview" />
+          <canvas id="treasurer_canvas" class="hidden"></canvas>
+        </div>
+      </div>
+
+      <!-- MEMBERS -->
+      <div class="card">
+        <h3>Members</h3>
+        <div id="members"></div>
+        <div style="margin-top:12px">
+          <button id="addMemberBtn" class="btn secondary" type="button">Add Member</button>
+        </div>
+      </div>
+
+      <!-- COORDINATOR / SUBMIT -->
+      <div class="card">
+        <div class="grid">
+          <div>
+            <label>Coordinator</label>
+            <select id="coordinator"><option>President</option><option>Secretary</option><option>Treasurer</option><option>Member</option></select>
+          </div>
+          <div>
+            <label class="small muted">Status</label>
+            <div style="margin-top:8px">
+              <button id="submitBtn" class="btn">Submit</button>
+              <span id="statusMsg" class="muted"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+  // ===== CONFIG =====
+  const API_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL"; // <-- replace with your Web App URL
+
+  // ===== UTIL =====
+  async function postJSON(payload) {
+    try {
+      const res = await fetch(API_URL, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(payload) });
+      const json = await res.json();
+      return json;
+    } catch (err) {
+      console.error("API error", err);
+      return { ok:false, error: err.message || "Network error" };
+    }
+  }
+
+  function el(id){ return document.getElementById(id) }
+  function create(tag){ return document.createElement(tag) }
+
+  // ===== STATE =====
+  let dropdowns = { zones:[], provinces:{}, districts:{}, areas:[] };
+  let memberIndex = 0;
+
+  // ===== LOGIN =====
+  document.getElementById("loginForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const payload = { action:"login", username: el("username").value.trim(), email: el("email").value.trim(), password: el("password").value };
+    const res = await postJSON(payload);
+    if(res && res.ok){
+      el("loginCard").classList.add("hidden");
+      el("app").classList.remove("hidden");
+      await loadDropdowns();
+      initRoleCustomSelects();
+      setupRolePhotoControls();
+    } else {
+      alert(res.error || "Invalid credentials");
+    }
+  });
+
+  // ===== LOAD DROPDOWNS =====
+  async function loadDropdowns(){
+    el("statusMsg").textContent = "Loading...";
+    const res = await postJSON({ action:"getDropdowns" });
+    if(!res || !res.ok){ el("statusMsg").textContent = "Failed to load dropdowns"; console.warn(res); debugPopulateLocal(); return; }
+    dropdowns = res;
+    populateSelect("zone", res.zones || []);
+    populateSelect("area", res.areas || []);
+    updateProvinces();
+    el("zone").addEventListener("change", updateProvinces);
+    el("province").addEventListener("change", updateDistricts);
+    el("area").addEventListener("change", handleAreaChange);
+    el("addMemberBtn").addEventListener("click", ()=> addMember());
+    el("submitBtn").addEventListener("click", submitForm);
+    el("statusMsg").textContent = "";
+  }
+
+  function populateSelect(id, list){ const s=el(id); if(!s)return; s.innerHTML=""; (list||[]).forEach(v => { const o = create("option"); o.value=v; o.textContent=v; s.appendChild(o); }); }
+
+  function updateProvinces(){
+    const z = el("zone").value;
+    populateSelect("province", dropdowns.provinces[z] || []);
+    updateDistricts();
+  }
+  function updateDistricts(){
+    const p = el("province").value;
+    populateSelect("district", dropdowns.districts[p] || []);
+  }
+
+  // ===== AREA change handling =====
+  async function handleAreaChange(){
+    const a = el("area").value;
+    if(a === "New"){
+      el("newAreaDiv").classList.remove("hidden");
+      clearForm(false);
+    } else {
+      el("newAreaDiv").classList.add("hidden");
+      const res = await postJSON({ action:"getFormData", area: a });
+      if(res && res.ok && res.data){ fillForm(res.data); }
+      else { clearForm(false); el("statusMsg").textContent = "No data for selected area"; }
+    }
+  }
+
+  // ===== FILL / CLEAR FORM =====
+  function fillForm(data){
+    if(!data) return;
+    // location
+    el("zone").value = data.Zone || "";
+    updateProvinces();
+    el("province").value = data.Province || "";
+    updateDistricts();
+    el("district").value = data.District || "";
+    el("area").value = data.Area || "";
+
+    // president
+    el("president_name").value = data["President Name"] || "";
+    el("president_contact").value = data["President Contact"] || "";
+    el("president_whatsapp").value = data["President WhatsApp"] || "";
+    setSelectOrCustom("president","marital", data["President Marital"] || "");
+    setSelectOrCustom("president","status", data["President Status"] || "");
+    if(data["President Photo URL"]) { el("president_photo_preview").src = data["President Photo URL"]; el("president_photo_preview").dataset.base64 = ""; }
+
+    // secretary
+    el("secretary_name").value = data["Secretary Name"] || "";
+    el("secretary_contact").value = data["Secretary Contact"] || "";
+    el("secretary_whatsapp").value = data["Secretary WhatsApp"] || "";
+    setSelectOrCustom("secretary","marital", data["Secretary Marital"] || "");
+    setSelectOrCustom("secretary","status", data["Secretary Status"] || "");
+    if(data["Secretary Photo URL"]) { el("secretary_photo_preview").src = data["Secretary Photo URL"]; el("secretary_photo_preview").dataset.base64 = ""; }
+
+    // treasurer
+    el("treasurer_name").value = data["Treasurer Name"] || "";
+    el("treasurer_contact").value = data["Treasurer Contact"] || "";
+    el("treasurer_whatsapp").value = data["Treasurer WhatsApp"] || "";
+    setSelectOrCustom("treasurer","marital", data["Treasurer Marital"] || "");
+    setSelectOrCustom("treasurer","status", data["Treasurer Status"] || "");
+    if(data["Treasurer Photo URL"]) { el("treasurer_photo_preview").src = data["Treasurer Photo URL"]; el("treasurer_photo_preview").dataset.base64 = ""; }
+
+    // coordinator
+    el("coordinator").value = data["Coordinator"] || "President";
+
+    // members: clear then populate
+    clearMembers();
+    const members = data.members || [];
+    members.forEach(m => addMember(m));
+  }
+
+  function clearForm(clearArea = true){
+    if(clearArea){ el("zone").selectedIndex = 0; updateProvinces(); }
+    ["president_name","president_contact","president_whatsapp","secretary_name","secretary_contact","secretary_whatsapp","treasurer_name","treasurer_contact","treasurer_whatsapp"].forEach(id=> { if(el(id)) el(id).value=""; });
+    ["president_marital_custom","president_status_custom","secretary_marital_custom","secretary_status_custom","treasurer_marital_custom","treasurer_status_custom"].forEach(id=> { if(el(id)){ el(id).value=""; el(id).classList.add("hidden"); }});
+    ["president_photo_preview","secretary_photo_preview","treasurer_photo_preview"].forEach(id=> { if(el(id)){ el(id).src=""; el(id).dataset.base64=""; }});
+    el("coordinator").selectedIndex = 0;
+    clearMembers();
+  }
+
+  // ===== MEMBERS =====
+  function clearMembers(){ el("members").innerHTML=""; memberIndex=0; }
+
+  function addMember(existing = {}){
+    memberIndex++;
+    const root = create("div"); root.className = "member-block"; root.dataset.index = memberIndex;
+    root.innerHTML = `
+      <div class="grid">
+        <div><label>Full name</label><input class="m-name" value="${escapeHtml(existing.name||'')}" /></div>
+        <div><label>Contact No</label><input class="m-contact" value="${escapeHtml(existing.contact||'')}" /></div>
+        <div><label>Whatsapp No</label><input class="m-whatsapp" value="${escapeHtml(existing.whatsapp||'')}" /></div>
+        <div>
+          <label>Marital status</label>
+          <select class="m-marital"><option>Single</option><option>Married</option><option>Other</option></select>
+          <input class="m-marital-custom custom-input hidden" placeholder="Enter custom marital status" />
+        </div>
+        <div>
+          <label>Status</label>
+          <select class="m-status"><option>Active</option><option>Inactive</option><option>Other</option></select>
+          <input class="m-status-custom custom-input hidden" placeholder="Enter custom status" />
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label>Photo option</label>
+        <select class="m-photo-mode"><option value="none">None</option><option value="upload">Upload Photo</option><option value="camera">Take Photo</option></select>
+        <input type="file" accept="image/*" class="m-photo-file hidden" />
+        <button type="button" class="m-take-photo-btn hidden btn secondary">Open Camera</button>
+        <img class="m-photo-preview photo-preview" />
+        <canvas class="m-canvas hidden"></canvas>
+      </div>
+
+      <div style="margin-top:10px">
+        <button class="btn danger remove-member" type="button">Remove Member</button>
+      </div>
+    `;
+    el("members").appendChild(root);
+
+    // set existing values
+    if(existing.marital){ const sel = root.querySelector(".m-marital"); if(Array.from(sel.options).some(o=>o.value===existing.marital)) sel.value=existing.marital; else { sel.value="Other"; const cust = root.querySelector(".m-marital-custom"); cust.classList.remove("hidden"); cust.value = existing.marital; } }
+    if(existing.status){ const sel = root.querySelector(".m-status"); if(Array.from(sel.options).some(o=>o.value===existing.status)) sel.value=existing.status; else { sel.value="Other"; const cust = root.querySelector(".m-status-custom"); cust.classList.remove("hidden"); cust.value = existing.status; } }
+    if(existing.photoUrl){ const prev = root.querySelector(".m-photo-preview"); prev.src = existing.photoUrl; prev.dataset.base64 = ""; }
+
+    // wire custom selects and photo controls
+    setupMemberCustomSelects(root);
+    setupMemberPhotoControls(root);
+
+    // remove button
+    root.querySelector(".remove-member").addEventListener("click", ()=> root.remove());
+  }
+
+  // ===== CUSTOM SELECTS (Other -> custom input) =====
+  function initRoleCustomSelects(){
+    ["president","secretary","treasurer"].forEach(setupRoleCustomSelects);
+  }
+  function setupRoleCustomSelects(role){
+    const ms = el(role + "_marital"), mc = el(role + "_marital_custom");
+    const ss = el(role + "_status"), sc = el(role + "_status_custom");
+    if(ms){ ms.addEventListener("change", ()=> { if(ms.value==="Other"){ mc.classList.remove("hidden"); } else { mc.classList.add("hidden"); mc.value=""; } }); }
+    if(ss){ ss.addEventListener("change", ()=> { if(ss.value==="Other"){ sc.classList.remove("hidden"); } else { sc.classList.add("hidden"); sc.value=""; } }); }
+  }
+  function setupMemberCustomSelects(memberRoot){
+    const ms = memberRoot.querySelector(".m-marital"), mc = memberRoot.querySelector(".m-marital-custom");
+    const ss = memberRoot.querySelector(".m-status"), sc = memberRoot.querySelector(".m-status-custom");
+    if(ms){ ms.addEventListener("change", ()=> { if(ms.value==="Other"){ mc.classList.remove("hidden"); } else { mc.classList.add("hidden"); mc.value=""; } }); }
+    if(ss){ ss.addEventListener("change", ()=> { if(ss.value==="Other"){ sc.classList.remove("hidden"); } else { sc.classList.add("hidden"); sc.value=""; } }); }
+  }
+
+  // ===== PHOTO CONTROLS =====
+  function fileToDataURL(file){ return new Promise((res,rej)=> { if(!file) return res(""); const r = new FileReader(); r.onload = e=> res(e.target.result); r.onerror = rej; r.readAsDataURL(file); }); }
+
+  function setupPhotoControls({ modeSelect, fileInput, cameraBtn, previewImg, canvasEl }){
+    function updateMode(){
+      const m = modeSelect.value;
+      if(m==="upload"){ fileInput.classList.remove("hidden"); cameraBtn.classList.add("hidden"); }
+      else if(m==="camera"){ fileInput.classList.add("hidden"); cameraBtn.classList.remove("hidden"); }
+      else { fileInput.classList.add("hidden"); cameraBtn.classList.add("hidden"); previewImg.src=""; previewImg.dataset.base64=""; }
+    }
+    modeSelect.addEventListener("change", updateMode);
+    updateMode();
+
+    fileInput.addEventListener("change", async ()=> {
+      const f = fileInput.files[0]; if(!f) return;
+      const dataUrl = await fileToDataURL(f);
+      previewImg.src = dataUrl; previewImg.dataset.base64 = dataUrl;
+    });
+
+    cameraBtn.addEventListener("click", async ()=> {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const video = create("video"); video.style.display="none"; document.body.appendChild(video);
+        video.srcObject = s; await video.play();
+        canvasEl.width = video.videoWidth || 640; canvasEl.height = video.videoHeight || 480;
+        const ctx = canvasEl.getContext("2d"); ctx.drawImage(video,0,0,canvasEl.width,canvasEl.height);
+        const dataUrl = canvasEl.toDataURL("image/jpeg",0.8);
+        previewImg.src = dataUrl; previewImg.dataset.base64 = dataUrl;
+        s.getTracks().forEach(t=>t.stop()); video.remove();
+      } catch(err){ alert("Camera error: " + (err.message||err)); }
+    });
+  }
+
+  function setupRolePhotoControls(){
+    ["president","secretary","treasurer"].forEach(role=>{
+      const mode = el(role + "_photo_mode"), file = el(role + "_photo_file"), btn = el(role + "_take_photo_btn"), prev = el(role + "_photo_preview"), canvas = el(role + "_canvas");
+      if(mode && file && btn && prev && canvas) setupPhotoControls({ modeSelect:mode, fileInput:file, cameraBtn:btn, previewImg:prev, canvasEl:canvas });
+    });
+  }
+  function setupMemberPhotoControls(memberRoot){
+    const mode = memberRoot.querySelector(".m-photo-mode"), file = memberRoot.querySelector(".m-photo-file"), btn = memberRoot.querySelector(".m-take-photo-btn"), prev = memberRoot.querySelector(".m-photo-preview"), canvas = memberRoot.querySelector(".m-canvas");
+    if(mode && file && btn && prev && canvas) setupPhotoControls({ modeSelect: mode, fileInput: file, cameraBtn: btn, previewImg: prev, canvasEl: canvas });
+  }
+
+  // ===== COLLECT FORM DATA =====
+  function getRoleValue(role, field){
+    const sel = el(role + "_" + field);
+    const cust = el(role + "_" + field + "_custom");
+    if(!sel) return "";
+    if(sel.value === "Other" && cust && cust.value.trim() !== "") return cust.value.trim();
+    return sel.value;
+  }
+
+  function collectMembers(){
+    const arr = [];
+    document.querySelectorAll("#members .member-block").forEach(block=>{
+      const maritalSel = block.querySelector(".m-marital"), maritalCust = block.querySelector(".m-marital-custom");
+      const statusSel = block.querySelector(".m-status"), statusCust = block.querySelector(".m-status-custom");
+      const marital = maritalSel && maritalSel.value === "Other" && maritalCust && maritalCust.value.trim() ? maritalCust.value.trim() : (maritalSel ? maritalSel.value : "");
+      const status = statusSel && statusSel.value === "Other" && statusCust && statusCust.value.trim() ? statusCust.value.trim() : (statusSel ? statusSel.value : "");
+      arr.push({
+        name: (block.querySelector(".m-name")?.value||"").trim(),
+        contact: (block.querySelector(".m-contact")?.value||"").trim(),
+        whatsapp: (block.querySelector(".m-whatsapp")?.value||"").trim(),
+        marital: marital,
+        status: status,
+        photoBase64: block.querySelector(".m-photo-preview")?.dataset?.base64 || ""
+      });
+    });
+    return arr;
+  }
+
+  // ===== SUBMIT =====
+  async function submitForm(){
+    const areaSel = el("area").value;
+    const areaName = areaSel === "New" ? el("newAreaName").value.trim() : areaSel;
+    if(!areaName){ alert("Please provide area name"); return; }
+
+    const formData = {
+      "Zone": el("zone").value,
+      "Province": el("province").value,
+      "District": el("district").value,
+      "Area": areaName,
+      "President Name": el("president_name").value.trim(),
+      "President Contact": el("president_contact").value.trim(),
+      "President WhatsApp": el("president_whatsapp").value.trim(),
+      "President Marital": getRoleValue("president","marital"),
+      "President Status": getRoleValue("president","status"),
+      "Secretary Name": el("secretary_name").value.trim(),
+      "Secretary Contact": el("secretary_contact").value.trim(),
+      "Secretary WhatsApp": el("secretary_whatsapp").value.trim(),
+      "Secretary Marital": getRoleValue("secretary","marital"),
+      "Secretary Status": getRoleValue("secretary","status"),
+      "Treasurer Name": el("treasurer_name").value.trim(),
+      "Treasurer Contact": el("treasurer_contact").value.trim(),
+      "Treasurer WhatsApp": el("treasurer_whatsapp").value.trim(),
+      "Treasurer Marital": getRoleValue("treasurer","marital"),
+      "Treasurer Status": getRoleValue("treasurer","status"),
+      "Coordinator": el("coordinator").value,
+      members: collectMembers(),
+      PresidentPhotoBase64: el("president_photo_preview").dataset.base64 || "",
+      SecretaryPhotoBase64: el("secretary_photo_preview").dataset.base64 || "",
+      TreasurerPhotoBase64: el("treasurer_photo_preview").dataset.base64 || ""
+    };
+
+    el("statusMsg").textContent = "Submitting...";
+    const res = await postJSON({ action:"submitForm", formData });
+    if(res && res.ok){
+      el("statusMsg").textContent = `Saved (${res.status})`;
+      // refresh areas to include new area if any
+      const dd = await postJSON({ action:"getDropdowns" });
+      if(dd && dd.ok){ dropdowns = dd; populateSelect("area", dd.areas); el("area").value = areaName; el("newAreaDiv").classList.add("hidden"); }
+    } else {
+      el("statusMsg").textContent = res.error || "Save failed";
+    }
+  }
+
+  // ===== UTIL: set select or custom field when loading existing value =====
+  function setSelectOrCustom(role, field, value){
+    const sel = el(role + "_" + field);
+    const cust = el(role + "_" + field + "_custom");
+    if(!sel) return;
+    const found = Array.from(sel.options).some(o=>o.value === value);
+    if(found){ sel.value = value; if(cust) { cust.classList.add("hidden"); cust.value=""; } }
+    else { sel.value = "Other"; if(cust){ cust.classList.remove("hidden"); cust.value = value || ""; } }
+  }
+
+  // ===== DEBUG fallback if API fails =====
+  function debugPopulateLocal(){
+    const zones = ["ZONE 1","ZONE 2"];
+    const provinces = { "ZONE 1":["Northern","Eastern","Northern Western","North Central"], "ZONE 2":["Uva","Sabaragamuwa","Western","Southern","Central"] };
+    const districts = { "Northern":["Jaffna","Kilinochchi","Mannar"], "Eastern":["Batticaloa","Trincomalee","Ampara"], "Western":["Colombo","Gampaha","Kalutara"], "Southern":["Galle","Matara","Hambantota"], "Central":["Kandy","Matale","Nuwara Eliya"], "Uva":["Badulla","Monaragala"], "Sabaragamuwa":["Ratnapura","Kegalle"], "Northern Western":["Kurunegala","Puttalam"], "North Central":["Anuradhapura","Polonnaruwa"]};
+    dropdowns = { zones, provinces, districts, areas:["Sample Area 1","Sample Area 2","New"] };
+    populateSelect("zone", zones); populateSelect("area", dropdowns.areas);
+    updateProvinces();
+  }
+
+  // ===== HTML escaping helper =====
+  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]); }
+
+  // ===== STARTUP: expose some functions to global for dynamic calls =====
+  window.addMember = addMember;
+  window.setupMemberPhotoControls = setupMemberPhotoControls;
+  window.setupMemberCustomSelects = setupMemberCustomSelects;
+
+  // Ensure role photo controls and custom selects are wired when app becomes visible
+  // (they are wired after login success in the login handler)
+  </script>
+</body>
+</html>
