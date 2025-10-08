@@ -404,8 +404,43 @@ function fillForm(data){
   clearMembers();
   const members = data.members || [];
   members.forEach(m => addMember(m));
+   // Attach live listeners to President/Secretary/Treasurer name inputs
+  ["president_name","secretary_name","treasurer_name"].forEach(id => {
+    const elInput = el(id);
+    if(elInput) elInput.addEventListener("input", updateCoordinatorOptions);
+  });
 }
+  function updateCoordinatorOptions() {
+  const coordinatorSelect = el("coordinator");
+  if (!coordinatorSelect) return;
 
+  // Clear existing options
+  coordinatorSelect.innerHTML = "";
+
+  // Helper to add an option
+  function addOption(title, name) {
+    if (name && name.trim() !== "") {
+      const opt = create("option");
+      opt.value = name;
+      opt.textContent = `${title} - ${name}`;
+      coordinatorSelect.appendChild(opt);
+    }
+  }
+
+  // Add President, Secretary, Treasurer
+  addOption("President", el("president_name")?.value);
+  addOption("Secretary", el("secretary_name")?.value);
+  addOption("Treasurer", el("treasurer_name")?.value);
+
+  // Add Members
+  const members = document.querySelectorAll(".member-block");
+  members.forEach((mBlock, index) => {
+    const name = mBlock.querySelector(".m-name")?.value;
+    if (name && name.trim() !== "") {
+      addOption(`Member ${index + 1}`, name);
+    }
+  });
+}
   function clearForm(clearArea = true){
     if(clearArea){ el("zone").selectedIndex = 0; updateProvinces(); }
     ["president_name","president_contact","president_whatsapp","secretary_name","secretary_contact","secretary_whatsapp","treasurer_name","treasurer_contact","treasurer_whatsapp"].forEach(id=> { if(el(id)) el(id).value=""; });
@@ -416,59 +451,90 @@ function fillForm(data){
   }
 
   // ===== MEMBERS =====
-  function clearMembers(){ el("members").innerHTML=""; memberIndex=0; }
+ function clearMembers() {
+  el("members").innerHTML = "";
+  memberIndex = 0;
+  updateCoordinatorOptions(); // clear coordinator options too
+}
 
-  function addMember(existing = {}){
-    memberIndex++;
-    const root = create("div"); root.className = "member-block"; root.dataset.index = memberIndex;
-    root.innerHTML = `
-      <div class="grid">
-        <div><label>Full name</label><input class="m-name" value="${escapeHtml(existing.name||'')}" /></div>
-        <div><label>Contact No</label><input class="m-contact" value="${escapeHtml(existing.contact||'')}" /></div>
-        <div><label>Whatsapp No</label><input class="m-whatsapp" value="${escapeHtml(existing.whatsapp||'')}" /></div>
-        <div>
-          <label>Marital status</label>
-          <select class="m-marital"><option value="">Select</option>
-          <option value="Single">Single</option>
-          <option value="Married">Married</option>
-          <option value="Other">Other</option>
-        </select>
-          <input class="m-marital-custom custom-input hidden" placeholder="Enter custom marital status" />
-        </div>
-        <div>
-          <label>Status</label>
-          <select class="m-status"><option value="">Select</option><option>Active</option><option>Inactive</option><option>Other</option></select>
-          <input class="m-status-custom custom-input hidden" placeholder="Enter custom status" />
-        </div>
+ function addMember(existing = {}) {
+  memberIndex++;
+  const root = create("div"); 
+  root.className = "member-block"; 
+  root.dataset.index = memberIndex;
+
+  root.innerHTML = `
+    <div class="grid">
+      <div><label>Full name</label><input class="m-name" value="${escapeHtml(existing.name||'')}" /></div>
+      <div><label>Contact No</label><input class="m-contact" value="${escapeHtml(existing.contact||'')}" /></div>
+      <div><label>Whatsapp No</label><input class="m-whatsapp" value="${escapeHtml(existing.whatsapp||'')}" /></div>
+      <div>
+        <label>Marital status</label>
+        <select class="m-marital"><option value="">Select</option>
+        <option value="Single">Single</option>
+        <option value="Married">Married</option>
+        <option value="Other">Other</option></select>
+        <input class="m-marital-custom custom-input hidden" placeholder="Enter custom marital status" />
       </div>
-
-      <div style="margin-top:10px">
-        <label>Photo option</label>
-        <select class="m-photo-mode"><option value="none">None</option><option value="upload">Upload Photo</option><option value="camera">Take Photo</option></select>
-        <input type="file" accept="image/*" class="m-photo-file hidden" />
-        <button type="button" class="m-take-photo-btn hidden btn secondary">Open Camera</button>
-        <img class="m-photo-preview photo-preview" />
-        <canvas class="m-canvas hidden"></canvas>
+      <div>
+        <label>Status</label>
+        <select class="m-status"><option value="">Select</option><option>Active</option><option>Inactive</option><option>Other</option></select>
+        <input class="m-status-custom custom-input hidden" placeholder="Enter custom status" />
       </div>
+    </div>
 
-      <div style="margin-top:10px">
-        <button class="btn danger remove-member" type="button">Remove Member</button>
-      </div>
-    `;
-    el("members").appendChild(root);
+    <div style="margin-top:10px">
+      <label>Photo option</label>
+      <select class="m-photo-mode"><option value="none">None</option><option value="upload">Upload Photo</option><option value="camera">Take Photo</option></select>
+      <input type="file" accept="image/*" class="m-photo-file hidden" />
+      <button type="button" class="m-take-photo-btn hidden btn secondary">Open Camera</button>
+      <img class="m-photo-preview photo-preview" />
+      <canvas class="m-canvas hidden"></canvas>
+    </div>
 
-    // set existing values
-    if(existing.marital){ const sel = root.querySelector(".m-marital"); if(Array.from(sel.options).some(o=>o.value===existing.marital)) sel.value=existing.marital; else { sel.value="Other"; const cust = root.querySelector(".m-marital-custom"); cust.classList.remove("hidden"); cust.value = existing.marital; } }
-    if(existing.status){ const sel = root.querySelector(".m-status"); if(Array.from(sel.options).some(o=>o.value===existing.status)) sel.value=existing.status; else { sel.value="Other"; const cust = root.querySelector(".m-status-custom"); cust.classList.remove("hidden"); cust.value = existing.status; } }
-    if(existing.photoUrl){ const prev = root.querySelector(".m-photo-preview"); prev.src = existing.photoUrl; prev.dataset.base64 = ""; }
+    <div style="margin-top:10px">
+      <button class="btn danger remove-member" type="button">Remove Member</button>
+    </div>
+  `;
+  
+  el("members").appendChild(root);
 
-    // wire custom selects and photo controls
-    setupMemberCustomSelects(root);
-    setupMemberPhotoControls(root);
-
-    // remove button
-    root.querySelector(".remove-member").addEventListener("click", ()=> root.remove());
+  // Set existing values
+  if(existing.marital){ 
+    const sel = root.querySelector(".m-marital"); 
+    if(Array.from(sel.options).some(o=>o.value===existing.marital)) sel.value=existing.marital; 
+    else { sel.value="Other"; const cust = root.querySelector(".m-marital-custom"); cust.classList.remove("hidden"); cust.value = existing.marital; } 
   }
+  if(existing.status){ 
+    const sel = root.querySelector(".m-status"); 
+    if(Array.from(sel.options).some(o=>o.value===existing.status)) sel.value=existing.status; 
+    else { sel.value="Other"; const cust = root.querySelector(".m-status-custom"); cust.classList.remove("hidden"); cust.value = existing.status; } 
+  }
+  if(existing.photoUrl){ 
+    const prev = root.querySelector(".m-photo-preview"); 
+    prev.src = existing.photoUrl; 
+    prev.dataset.base64 = ""; 
+  }
+
+  // Wire custom selects and photo controls
+  setupMemberCustomSelects(root);
+  setupMemberPhotoControls(root);
+
+  // Remove button
+  root.querySelector(".remove-member").addEventListener("click", () => {
+    root.remove();
+    updateCoordinatorOptions(); // refresh coordinator after removal
+  });
+
+  // Update coordinator dropdown whenever this member name changes
+  const nameInput = root.querySelector(".m-name");
+  if(nameInput){
+    nameInput.addEventListener("input", updateCoordinatorOptions);
+  }
+
+  // Refresh coordinator after adding new member
+  updateCoordinatorOptions();
+}
 
   // ===== CUSTOM SELECTS (Other -> custom input) =====
   function initRoleCustomSelects(){
