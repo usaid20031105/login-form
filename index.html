@@ -232,13 +232,15 @@
       body: JSON.stringify(payload)
     });
     const text = await res.text();
-    console.log("POST", API_URL, "payload:", payload);
-    console.log("HTTP", res.status, res.statusText, "responseText:", text);
-    try { return JSON.parse(text); } catch (e) {
-      return { ok: false, error: "Invalid JSON from server", raw: text, status: res.status };
+    console.log("POST to:", API_URL);
+    console.log("Payload:", payload);
+    console.log("Response text:", text);
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      return { ok: false, error: "Invalid JSON from server", raw: text };
     }
   } catch (err) {
-    console.error("Fetch error:", err);
     return { ok: false, error: err.message || "Network error" };
   }
 }
