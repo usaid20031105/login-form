@@ -333,33 +333,45 @@ el("province")?.addEventListener("change", updateDistricts);
 el("district")?.addEventListener("change", updateAreas);
 el("area")?.addEventListener("change", handleAreaChange);    
 
-async function handleAreaChange() {
-  const a = el("area").value;
+function handleAreaChange() {
+  const areaSelect = el("area");
+  const prevValue = areaSelect.value; // remember previous value
+  const district = el("district").value;
+  const areas = districtToAreas[district] || [];
 
-  if (a === "New") {
-    // Show new area input and clear form
-    el("newAreaDiv").classList.remove("hidden");
-    clearForm(false);
+  // Clear dropdown but keep the "New" option
+  areaSelect.innerHTML = '';
+  const newOption = document.createElement("option");
+  newOption.value = "New";
+  newOption.textContent = "New";
+  areaSelect.appendChild(newOption);
+
+  // Add existing areas
+  areas.forEach(a => {
+    const opt = document.createElement("option");
+    opt.value = a;
+    opt.textContent = a;
+    areaSelect.appendChild(opt);
+  });
+
+  // Restore previous value if still valid
+  if (prevValue && (prevValue === "New" || areas.includes(prevValue))) {
+    areaSelect.value = prevValue;
   } else {
-    // Hide new area input
-    el("newAreaDiv").classList.add("hidden");
+    areaSelect.value = "New";
+  }
 
-    // Fetch existing data for the selected area
-    const res = await postJSON({ action: "getFormData", area: a });
-    
-    if (res && res.ok && res.data) {
-      // Fill form with existing data: president, secretary, treasurer, members
-      fillForm(res.data);
-    } else {
-      // No data found for selected area
-      clearForm(false);
-      el("statusMsg").textContent = "No data for selected area";
-    }
+  // If an existing area is selected, fetch its data
+  if (areaSelect.value !== "New") {
+    fetchFormData(areaSelect.value).then(data => fillForm(data));
+  } else {
+    clearForm();
   }
 }
 
+// ------------------- FILL FORM -------------------
 function fillForm(data) {
-  if (!data) return;
+  if(!data) return;
 
   // --- LOCATION ---
   el("zone").value = data.Zone || "";
@@ -370,71 +382,55 @@ function fillForm(data) {
   updateAreas();
   el("area").value = data.Area || "";
 
-  // --- PRESIDENT ---
-  el("president_name").value = data["President Name"] || "";
-  el("president_contact").value = data["President Contact"] || "";
-  el("president_whatsapp").value = data["President WhatsApp"] || "";
-  setSelectOrCustom("president", "marital", data["President Marital"] || "");
-  setSelectOrCustom("president", "status", data["President Status"] || "");
-  if (data["President Photo URL"]) {
-    el("president_photo_preview").src = data["President Photo URL"];
-    el("president_photo_preview").dataset.base64 = "";
-  }
-
-  // --- SECRETARY ---
-  el("secretary_name").value = data["Secretary Name"] || "";
-  el("secretary_contact").value = data["Secretary Contact"] || "";
-  el("secretary_whatsapp").value = data["Secretary WhatsApp"] || "";
-  setSelectOrCustom("secretary", "marital", data["Secretary Marital"] || "");
-  setSelectOrCustom("secretary", "status", data["Secretary Status"] || "");
-  if (data["Secretary Photo URL"]) {
-    el("secretary_photo_preview").src = data["Secretary Photo URL"];
-    el("secretary_photo_preview").dataset.base64 = "";
-  }
-
-  // --- TREASURER ---
-  el("treasurer_name").value = data["Treasurer Name"] || "";
-  el("treasurer_contact").value = data["Treasurer Contact"] || "";
-  el("treasurer_whatsapp").value = data["Treasurer WhatsApp"] || "";
-  setSelectOrCustom("treasurer", "marital", data["Treasurer Marital"] || "");
-  setSelectOrCustom("treasurer", "status", data["Treasurer Status"] || "");
-  if (data["Treasurer Photo URL"]) {
-    el("treasurer_photo_preview").src = data["Treasurer Photo URL"];
-    el("treasurer_photo_preview").dataset.base64 = "";
-  }
+  // --- OFFICERS ---
+  ["president","secretary","treasurer"].forEach(role=>{
+    el(${role}_name).value = data[${capitalize(role)} Name] || "";
+    el(${role}_contact).value = data[${capitalize(role)} Contact] || "";
+    el(${role}_whatsapp).value = data[${capitalize(role)} WhatsApp] || "";
+    setSelectOrCustom(role,"marital",data[${capitalize(role)} Marital] || "");
+    setSelectOrCustom(role,"status",data[${capitalize(role)} Status] || "");
+    if(data[${capitalize(role)} Photo URL]){
+      el(${role}_photo_preview).src = data[${capitalize(role)} Photo URL];
+      el(${role}_photo_preview).dataset.base64 = "";
+    }
+  });
 
   // --- MEMBERS ---
   clearMembers();
   const members = [];
-  let i = 1;
-  while (
-    data[`Member ${i} Name`] ||
-    data[`Member ${i} Contact`] ||
-    data[`Member ${i} WhatsApp`] ||
-    data[`Member ${i} Marital`] ||
-    data[`Member ${i} Status`]
-  ) {
+  let i=1;
+  while(data[Member ${i} Name] || data[Member ${i} Contact] || data[Member ${i} WhatsApp] || data[Member ${i} Marital] || data[Member ${i} Status]){
     members.push({
-      name: String(data[`Member ${i} Name`] || ""),
-      contact: String(data[`Member ${i} Contact`] || ""),
-      whatsapp: String(data[`Member ${i} WhatsApp`] || ""),
-      marital: String(data[`Member ${i} Marital`] || ""),
-      status: String(data[`Member ${i} Status`] || ""),
-      photoUrl: String(data[`Member ${i} Photo URL`] || "")
+      name: data[Member ${i} Name] || "",
+      contact: data[Member ${i} Contact] || "",
+      whatsapp: data[Member ${i} WhatsApp] || "",
+      marital: data[Member ${i} Marital] || "",
+      status: data[Member ${i} Status] || "",
+      photoUrl: data[Member ${i} Photo URL] || ""
     });
     i++;
   }
-  members.forEach((m) => addMember(m));
+  members.forEach(m=>addMember(m));
 
   // --- COORDINATOR ---
-  updateCoordinatorOptions();
-  el("coordinator").value = data["Coordinator"] || "President";
+  updateCoordinatorOptions();             // rebuild options
+  setCoordinator(data["Coordinator"]);   // set selected value
 
-  // --- Wire live coordinator updates ---
-  ["president_name", "secretary_name", "treasurer_name"].forEach((id) => {
+  // --- Wire live updates for officers ---
+  ["president_name","secretary_name","treasurer_name"].forEach(id=>{
     const elInput = el(id);
-    if (elInput) elInput.addEventListener("input", updateCoordinatorOptions);
+    if(elInput) elInput.addEventListener("input",updateCoordinatorOptions);
   });
+}
+
+// ------------------- HELPERS -------------------
+function setCoordinator(name){
+  const sel = el("coordinator");
+  if(sel && name) sel.value = name;
+}
+
+function capitalize(str){
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
   function updateCoordinatorOptions() {
   const coordinatorSelect = el("coordinator");
@@ -483,43 +479,49 @@ function fillForm(data) {
   updateCoordinatorOptions(); // clear coordinator options too
 }
 
+let memberIndex = 0;
+
+// ------------------- ADD MEMBER -------------------
 function addMember(existing = {}) {
   memberIndex++;
   const root = document.createElement("div");
   root.className = "member-block";
   root.dataset.index = memberIndex;
 
-  // Ensure all values are strings for escapeHtml
-  const name = existing.name ? String(existing.name) : "";
-  const contact = existing.contact ? String(existing.contact) : "";
-  const whatsapp = existing.whatsapp ? String(existing.whatsapp) : "";
-  const marital = existing.marital ? String(existing.marital) : "";
-  const status = existing.status ? String(existing.status) : "";
-  const photoUrl = existing.photoUrl ? String(existing.photoUrl) : "";
-
   root.innerHTML = `
     <div class="grid">
-      <div><label>Full name</label><input class="m-name" value="${escapeHtml(name)}" /></div>
-      <div><label>Contact No</label><input class="m-contact" value="${escapeHtml(contact)}" /></div>
-      <div><label>Whatsapp No</label><input class="m-whatsapp" value="${escapeHtml(whatsapp)}" /></div>
+      <div><label>Full name</label><input class="m-name" value="${escapeHtml(existing.name||'')}" /></div>
+      <div><label>Contact No</label><input class="m-contact" value="${escapeHtml(existing.contact||'')}" /></div>
+      <div><label>Whatsapp No</label><input class="m-whatsapp" value="${escapeHtml(existing.whatsapp||'')}" /></div>
       <div>
         <label>Marital status</label>
-        <select class="m-marital"><option value="">Select</option>
-        <option value="Single">Single</option>
-        <option value="Married">Married</option>
-        <option value="Other">Other</option></select>
+        <select class="m-marital">
+          <option value="">Select</option>
+          <option value="Single">Single</option>
+          <option value="Married">Married</option>
+          <option value="Other">Other</option>
+        </select>
         <input class="m-marital-custom custom-input hidden" placeholder="Enter custom marital status" />
       </div>
       <div>
         <label>Status</label>
-        <select class="m-status"><option value="">Select</option><option>Active</option><option>Inactive</option><option>Other</option></select>
+        <select class="m-status">
+          <option value="">Select</option>
+          <option>Active</option>
+          <option>Inactive</option>
+          <option>Other</option>
+        </select>
         <input class="m-status-custom custom-input hidden" placeholder="Enter custom status" />
       </div>
     </div>
 
     <div style="margin-top:10px">
       <label>Photo option</label>
-      <select class="m-photo-mode"><option value="none">None</option><option value="upload">Upload Photo</option><option value="camera">Take Photo</option></select>
+      <select class="m-photo-mode">
+        <option value="none">None</option>
+        <option value="upload">Upload Photo</option>
+        <option value="camera">Take Photo</option>
+      </select>
       <input type="file" accept="image/*" class="m-photo-file hidden" />
       <button type="button" class="m-take-photo-btn hidden btn secondary">Open Camera</button>
       <img class="m-photo-preview photo-preview" />
@@ -531,44 +533,40 @@ function addMember(existing = {}) {
     </div>
   `;
 
-  el("members").appendChild(root);
+  document.getElementById("members").appendChild(root);
 
-  // Set existing values for selects and photos
-  if (marital) {
-    const sel = root.querySelector(".m-marital");
-    if (Array.from(sel.options).some(o => o.value === marital)) sel.value = marital;
-    else { sel.value = "Other"; const cust = root.querySelector(".m-marital-custom"); cust.classList.remove("hidden"); cust.value = marital; }
+  // Set existing values
+  if(existing.marital){ 
+    const sel = root.querySelector(".m-marital"); 
+    if([...sel.options].some(o=>o.value===existing.marital)) sel.value=existing.marital; 
+    else { sel.value="Other"; const cust = root.querySelector(".m-marital-custom"); cust.classList.remove("hidden"); cust.value = existing.marital; } 
+  }
+  if(existing.status){ 
+    const sel = root.querySelector(".m-status"); 
+    if([...sel.options].some(o=>o.value===existing.status)) sel.value=existing.status; 
+    else { sel.value="Other"; const cust = root.querySelector(".m-status-custom"); cust.classList.remove("hidden"); cust.value = existing.status; } 
+  }
+  if(existing.photoUrl){ 
+    const prev = root.querySelector(".m-photo-preview"); 
+    prev.src = existing.photoUrl; 
+    prev.dataset.base64 = ""; 
   }
 
-  if (status) {
-    const sel = root.querySelector(".m-status");
-    if (Array.from(sel.options).some(o => o.value === status)) sel.value = status;
-    else { sel.value = "Other"; const cust = root.querySelector(".m-status-custom"); cust.classList.remove("hidden"); cust.value = status; }
-  }
+  setupMemberCustomSelects(root); // your existing function
+  setupMemberPhotoControls(root); // your existing function
 
-  if (photoUrl) {
-    const prev = root.querySelector(".m-photo-preview");
-    prev.src = photoUrl;
-    prev.dataset.base64 = "";
-  }
-
-  // Wire custom selects and photo controls
-  setupMemberCustomSelects(root);
-  setupMemberPhotoControls(root);
-
-  // Remove button
+  // Remove member
   root.querySelector(".remove-member").addEventListener("click", () => {
     root.remove();
     updateCoordinatorOptions();
   });
 
-  // Update coordinator whenever member name changes
+  // Update coordinator live when member name changes
   const nameInput = root.querySelector(".m-name");
-  if (nameInput) nameInput.addEventListener("input", updateCoordinatorOptions);
+  if(nameInput) nameInput.addEventListener("input", updateCoordinatorOptions);
 
   updateCoordinatorOptions();
 }
-
   // ===== CUSTOM SELECTS (Other -> custom input) =====
   function initRoleCustomSelects(){
     ["president","secretary","treasurer"].forEach(setupRoleCustomSelects);
