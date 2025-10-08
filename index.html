@@ -741,7 +741,10 @@ function addMember(existing = {}) {
   }
 
   // ===== HTML escaping helper =====
-  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]); }
+  function escapeHtml(s){
+  s = s == null ? "" : String(s);  // ensure s is always a string
+  return s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[c]);
+}
 
   // ===== STARTUP: expose some functions to global for dynamic calls =====
   window.addMember = addMember;
