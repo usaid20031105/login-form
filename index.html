@@ -386,32 +386,69 @@ async function handleAreaChange() {
 }
 // ------------------- FILL FORM -------------------
 function fillForm(data) {
-  if(!data) return;
+  if (!data) return;
 
-  // Fill main fields safely
-  ["zone","province","district","area","coordinator"].forEach(id=>{
+  // --- Zone/Province/District/Area ---
+  const mapSimple = {
+    zone: "Zone",
+    province: "Province",
+    district: "District",
+    area: "Area",
+    coordinator: "Coordinator"
+  };
+  for (const [id, key] of Object.entries(mapSimple)) {
     const el = document.getElementById(id);
-    if(el) el.value = data[id.charAt(0).toUpperCase() + id.slice(1)] || "";
-  });
+    if (el) el.value = data[key] || "";
+  }
 
-  const officers = ["president","secretary","treasurer"];
-  officers.forEach(off => {
-    ["name","contact","whatsapp","marital","status"].forEach(field=>{
-      const el = document.getElementById(`${off}-${field}`);
-      const key = `${off.charAt(0).toUpperCase() + off.slice(1)} ${field.charAt(0).toUpperCase() + field.slice(1)}`;
-      if(el) el.value = data[key] || "";
-    });
-  });
+  // --- President ---
+  const pres = {
+    name: "President Name",
+    contact: "President Contact",
+    whatsapp: "President WhatsApp",
+    marital: "President Marital",
+    status: "President Status"
+  };
+  for (const [suffix, key] of Object.entries(pres)) {
+    const el = document.getElementById(`president-${suffix}`);
+    if (el) el.value = data[key] || "";
+  }
 
-  // Clear members
+  // --- Secretary ---
+  const sec = {
+    name: "Secretary Name",
+    contact: "Secretary Contact",
+    whatsapp: "Secretary WhatsApp",
+    marital: "Secretary Marital",
+    status: "Secretary Status"
+  };
+  for (const [suffix, key] of Object.entries(sec)) {
+    const el = document.getElementById(`secretary-${suffix}`);
+    if (el) el.value = data[key] || "";
+  }
+
+  // --- Treasurer ---
+  const tre = {
+    name: "Treasurer Name",
+    contact: "Treasurer Contact",
+    whatsapp: "Treasurer WhatsApp",
+    marital: "Treasurer Marital",
+    status: "Treasurer Status"
+  };
+  for (const [suffix, key] of Object.entries(tre)) {
+    const el = document.getElementById(`treasurer-${suffix}`);
+    if (el) el.value = data[key] || "";
+  }
+
+  // --- Clear Members ---
   const membersContainer = document.getElementById("members");
-  if(membersContainer) membersContainer.innerHTML = "";
+  if (membersContainer) membersContainer.innerHTML = "";
   memberIndex = 0;
 
-  // Add prefilled Member 1..10
-  for(let i=1; i<=10; i++){
+  // --- Members from sheet columns (Member 1 Name, etc.) ---
+  for (let i = 1; i <= 10; i++) {
     const nameKey = `Member ${i} Name`;
-    if(data[nameKey] && data[nameKey].trim()!==""){
+    if (data[nameKey] && data[nameKey].trim() !== "") {
       addMember({
         name: data[`Member ${i} Name`] || "",
         contact: data[`Member ${i} Contact`] || "",
@@ -423,27 +460,28 @@ function fillForm(data) {
     }
   }
 
-  // Add extra members from data.members array
-  if(!Array.isArray(data.members)) data.members = [];
-  data.members.forEach(m=>{
-    addMember({
-      name: m.name || "",
-      contact: m.contact || "",
-      whatsapp: m.whatsapp || "",
-      marital: m.marital || "",
-      status: m.status || "",
-      photoUrl: m.photoUrl || ""
+  // --- Members from array (if present) ---
+  if (Array.isArray(data.members)) {
+    data.members.forEach(m => {
+      addMember({
+        name: m.name || "",
+        contact: m.contact || "",
+        whatsapp: m.whatsapp || "",
+        marital: m.marital || "",
+        status: m.status || "",
+        photoUrl: m.photoUrl || ""
+      });
     });
-  });
+  }
 
-  // Update coordinator options
+  // --- Coordinator Dropdown ---
   updateCoordinatorOptions();
   setCoordinator(data["Coordinator"]);
 
-  // Wire live updates
-  ["president-name","secretary-name","treasurer-name"].forEach(id=>{
+  // --- Live updates for officer names ---
+  ["president-name", "secretary-name", "treasurer-name"].forEach(id => {
     const el = document.getElementById(id);
-    if(el) el.addEventListener("input", updateCoordinatorOptions);
+    if (el) el.addEventListener("input", updateCoordinatorOptions);
   });
 }
 
