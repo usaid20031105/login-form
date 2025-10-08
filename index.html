@@ -333,34 +333,35 @@ el("province")?.addEventListener("change", updateDistricts);
 el("district")?.addEventListener("change", updateAreas);
 el("area")?.addEventListener("change", handleAreaChange);    
 
-// ===== AREA change handling =====
 async function handleAreaChange() {
-  const areaValue = el("area").value;
+  const a = el("area").value;
 
-  if (areaValue === "New") {
+  if (a === "New") {
+    // Show new area input and clear form
     el("newAreaDiv").classList.remove("hidden");
-    clearForm(false); // clear only form, keep area
+    clearForm(false);
   } else {
+    // Hide new area input
     el("newAreaDiv").classList.add("hidden");
-    const res = await postJSON({ action: "getFormData", area: areaValue });
 
+    // Fetch existing data for the selected area
+    const res = await postJSON({ action: "getFormData", area: a });
+    
     if (res && res.ok && res.data) {
+      // Fill form with existing data: president, secretary, treasurer, members
       fillForm(res.data);
     } else {
+      // No data found for selected area
       clearForm(false);
       el("statusMsg").textContent = "No data for selected area";
     }
   }
 }
 
-// ===== FILL FORM =====
 function fillForm(data) {
   if (!data) return;
 
-  console.log("Filling form data:", data); // Debug
-  console.log("Members array:", data.members); // Debug
-
-  // --- Location ---
+  // --- LOCATION ---
   el("zone").value = data.Zone || "";
   updateProvinces();
   el("province").value = data.Province || "";
@@ -369,7 +370,7 @@ function fillForm(data) {
   updateAreas();
   el("area").value = data.Area || "";
 
-  // --- President ---
+  // --- PRESIDENT ---
   el("president_name").value = data["President Name"] || "";
   el("president_contact").value = data["President Contact"] || "";
   el("president_whatsapp").value = data["President WhatsApp"] || "";
@@ -380,7 +381,7 @@ function fillForm(data) {
     el("president_photo_preview").dataset.base64 = "";
   }
 
-  // --- Secretary ---
+  // --- SECRETARY ---
   el("secretary_name").value = data["Secretary Name"] || "";
   el("secretary_contact").value = data["Secretary Contact"] || "";
   el("secretary_whatsapp").value = data["Secretary WhatsApp"] || "";
@@ -391,7 +392,7 @@ function fillForm(data) {
     el("secretary_photo_preview").dataset.base64 = "";
   }
 
-  // --- Treasurer ---
+  // --- TREASURER ---
   el("treasurer_name").value = data["Treasurer Name"] || "";
   el("treasurer_contact").value = data["Treasurer Contact"] || "";
   el("treasurer_whatsapp").value = data["Treasurer WhatsApp"] || "";
@@ -402,28 +403,39 @@ function fillForm(data) {
     el("treasurer_photo_preview").dataset.base64 = "";
   }
 
-  // --- Members ---
+  // --- COORDINATOR ---
+  el("coordinator").value = data["Coordinator"] || "President";
+
+  // --- MEMBERS ---
   clearMembers();
-  const members = data.members || [];
-  members.forEach((m) => {
-    addMember({
-      name: m.name || "",
-      contact: m.contact || "",
-      whatsapp: m.whatsapp || "",
-      marital: m.marital || "",
-      status: m.status || "",
-      photoUrl: m.photoUrl || ""
+  const members = [];
+  let i = 1;
+  while (
+    data[`Member ${i} Name`] ||
+    data[`Member ${i} Contact`] ||
+    data[`Member ${i} WhatsApp`] ||
+    data[`Member ${i} Marital`] ||
+    data[`Member ${i} Status`]
+  ) {
+    members.push({
+      name: data[`Member ${i} Name`] || "",
+      contact: data[`Member ${i} Contact`] || "",
+      whatsapp: data[`Member ${i} WhatsApp`] || "",
+      marital: data[`Member ${i} Marital`] || "",
+      status: data[`Member ${i} Status`] || "",
+      photoUrl: data[`Member ${i} Photo URL`] || ""
     });
-  });
+    i++;
+  }
+  members.forEach((m) => addMember(m));
 
-  // --- Coordinator ---
-  updateCoordinatorOptions();
-
-  // --- Live updates for coordinator dropdown when roles change ---
+  // --- Wire live coordinator updates ---
   ["president_name", "secretary_name", "treasurer_name"].forEach((id) => {
-    const input = el(id);
-    if (input) input.addEventListener("input", updateCoordinatorOptions);
+    const elInput = el(id);
+    if (elInput) elInput.addEventListener("input", updateCoordinatorOptions);
   });
+   // --- Coordinator ---
+  updateCoordinatorOptions();
 }
   function updateCoordinatorOptions() {
   const coordinatorSelect = el("coordinator");
