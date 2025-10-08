@@ -290,11 +290,17 @@ async function postJSON(payload) {
     el("statusMsg").textContent = "";
   }
 
-  function populateSelect(id, list){
+  function populateSelect(id, list, addSelectOption = true) {
   const s = el(id);
-  if(!s) return;
+  if (!s) return;
   s.innerHTML = "";
-  (list||[]).forEach(v => {
+  if (addSelectOption) {
+    const oSelect = create("option");
+    oSelect.value = "";
+    oSelect.textContent = "Select";
+    s.appendChild(oSelect);
+  }
+  (list || []).forEach(v => {
     const o = create("option");
     o.value = v;
     o.textContent = v;
@@ -302,30 +308,29 @@ async function postJSON(payload) {
   });
 }
 
-// ===== ZONE / PROVINCE / DISTRICT =====
-function updateProvinces(){
+function updateProvinces() {
   const z = el("zone").value;
   populateSelect("province", dropdowns.provinces[z] || []);
   updateDistricts();
 }
 
-function updateDistricts(){
+function updateDistricts() {
   const p = el("province").value;
   populateSelect("district", dropdowns.districts[p] || []);
-  updateAreas(); // <-- update Areas whenever district changes
+  updateAreas();
 }
 
-// ===== AREA Dropdown dependent on District =====
-function updateAreas(){
-  const district = el("district").value;
-  const areas = dropdowns.districtToAreas[district] || [];
-  areas.push("New"); // always allow New
+function updateAreas() {
+  const d = el("district").value;
+  const areas = dropdowns.districtToAreas[d] || [];
+  areas.push("New"); // add "New" option
   populateSelect("area", areas);
 }
-// Event listeners for live updates
-el("zone")?.addEventListener("change", () => { updateProvinces(); });
-el("province")?.addEventListener("change", () => { updateDistricts(); });
-el("district")?.addEventListener("change", () => { updateAreas(); });
+
+// Add event listeners
+el("zone")?.addEventListener("change", updateProvinces);
+el("province")?.addEventListener("change", updateDistricts);
+el("district")?.addEventListener("change", updateAreas);
 el("area")?.addEventListener("change", handleAreaChange);    
 
 // ===== AREA change handling =====
