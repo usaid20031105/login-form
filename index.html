@@ -334,15 +334,17 @@ el("district")?.addEventListener("change", updateAreas);
 el("area")?.addEventListener("change", handleAreaChange);    
 
 // ===== AREA change handling =====
-async function handleAreaChange(){
-  const a = el("area").value;
-  if(a === "New"){
+async function handleAreaChange() {
+  const areaValue = el("area").value;
+
+  if (areaValue === "New") {
     el("newAreaDiv").classList.remove("hidden");
-    clearForm(false);
+    clearForm(false); // clear only form, keep area
   } else {
     el("newAreaDiv").classList.add("hidden");
-    const res = await postJSON({ action:"getFormData", area: a });
-    if(res && res.ok && res.data){
+    const res = await postJSON({ action: "getFormData", area: areaValue });
+
+    if (res && res.ok && res.data) {
       fillForm(res.data);
     } else {
       clearForm(false);
@@ -351,11 +353,14 @@ async function handleAreaChange(){
   }
 }
 
-// ===== FILL / CLEAR FORM =====
-function fillForm(data){
-  if(!data) return;
+// ===== FILL FORM =====
+function fillForm(data) {
+  if (!data) return;
 
-  // --- LOCATION ---
+  console.log("Filling form data:", data); // Debug
+  console.log("Members array:", data.members); // Debug
+
+  // --- Location ---
   el("zone").value = data.Zone || "";
   updateProvinces();
   el("province").value = data.Province || "";
@@ -364,62 +369,61 @@ function fillForm(data){
   updateAreas();
   el("area").value = data.Area || "";
 
-  // --- PRESIDENT ---
+  // --- President ---
   el("president_name").value = data["President Name"] || "";
   el("president_contact").value = data["President Contact"] || "";
   el("president_whatsapp").value = data["President WhatsApp"] || "";
-  setSelectOrCustom("president","marital", data["President Marital"] || "");
-  setSelectOrCustom("president","status", data["President Status"] || "");
-  if(data["President Photo URL"]){
+  setSelectOrCustom("president", "marital", data["President Marital"] || "");
+  setSelectOrCustom("president", "status", data["President Status"] || "");
+  if (data["President Photo URL"]) {
     el("president_photo_preview").src = data["President Photo URL"];
     el("president_photo_preview").dataset.base64 = "";
   }
 
-  // --- SECRETARY ---
+  // --- Secretary ---
   el("secretary_name").value = data["Secretary Name"] || "";
   el("secretary_contact").value = data["Secretary Contact"] || "";
   el("secretary_whatsapp").value = data["Secretary WhatsApp"] || "";
-  setSelectOrCustom("secretary","marital", data["Secretary Marital"] || "");
-  setSelectOrCustom("secretary","status", data["Secretary Status"] || "");
-  if(data["Secretary Photo URL"]){
+  setSelectOrCustom("secretary", "marital", data["Secretary Marital"] || "");
+  setSelectOrCustom("secretary", "status", data["Secretary Status"] || "");
+  if (data["Secretary Photo URL"]) {
     el("secretary_photo_preview").src = data["Secretary Photo URL"];
     el("secretary_photo_preview").dataset.base64 = "";
   }
 
-  // --- TREASURER ---
+  // --- Treasurer ---
   el("treasurer_name").value = data["Treasurer Name"] || "";
   el("treasurer_contact").value = data["Treasurer Contact"] || "";
   el("treasurer_whatsapp").value = data["Treasurer WhatsApp"] || "";
-  setSelectOrCustom("treasurer","marital", data["Treasurer Marital"] || "");
-  setSelectOrCustom("treasurer","status", data["Treasurer Status"] || "");
-  if(data["Treasurer Photo URL"]){
+  setSelectOrCustom("treasurer", "marital", data["Treasurer Marital"] || "");
+  setSelectOrCustom("treasurer", "status", data["Treasurer Status"] || "");
+  if (data["Treasurer Photo URL"]) {
     el("treasurer_photo_preview").src = data["Treasurer Photo URL"];
     el("treasurer_photo_preview").dataset.base64 = "";
   }
 
-  // --- MEMBERS ---
+  // --- Members ---
   clearMembers();
   const members = data.members || [];
-  members.forEach(memberData => addMember({
-    name: memberData.name || "",
-    contact: memberData.contact || "",
-    whatsapp: memberData.whatsapp || "",
-    marital: memberData.marital || "",
-    status: memberData.status || "",
-    photoUrl: memberData.photoUrl || ""
-  }));
-
-  // --- COORDINATOR ---
-  updateCoordinatorOptions();
-  el("coordinator").value = data["Coordinator"] || "President";
-
-  // --- ROLE INPUT LISTENERS ---
-  ["president_name","secretary_name","treasurer_name"].forEach(id => {
-    const elInput = el(id);
-    if(elInput) elInput.addEventListener("input", updateCoordinatorOptions);
+  members.forEach((m) => {
+    addMember({
+      name: m.name || "",
+      contact: m.contact || "",
+      whatsapp: m.whatsapp || "",
+      marital: m.marital || "",
+      status: m.status || "",
+      photoUrl: m.photoUrl || ""
+    });
   });
-  // --- UPDATE COORDINATOR DROPDOWN AFTER ALL MEMBERS ARE LOADED ---
+
+  // --- Coordinator ---
   updateCoordinatorOptions();
+
+  // --- Live updates for coordinator dropdown when roles change ---
+  ["president_name", "secretary_name", "treasurer_name"].forEach((id) => {
+    const input = el(id);
+    if (input) input.addEventListener("input", updateCoordinatorOptions);
+  });
 }
   function updateCoordinatorOptions() {
   const coordinatorSelect = el("coordinator");
