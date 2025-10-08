@@ -484,13 +484,7 @@ function fillForm(data) {
     if (el) el.addEventListener("input", updateCoordinatorOptions);
   });
 }
-
 // ------------------- HELPERS -------------------
-function setCoordinator(name){
-  const sel = el("coordinator");
-  if(sel && name) sel.value = name;
-}
-
 function capitalize(str){
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
