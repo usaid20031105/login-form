@@ -333,18 +333,14 @@ el("province")?.addEventListener("change", updateDistricts);
 el("district")?.addEventListener("change", updateAreas);
 el("area")?.addEventListener("change", handleAreaChange);    
 
-function handleAreaChange() {
+async function handleAreaChange() {
   const areaSelect = el("area");
   const prevValue = areaSelect.value; // remember previous value
   const district = el("district").value;
-  const areas = districtToAreas[district] || [];
+  const areas = dropdowns.districtToAreas[district] || [];
 
-  // Clear dropdown but keep the "New" option
+  // Clear dropdown
   areaSelect.innerHTML = '';
-  const newOption = document.createElement("option");
-  newOption.value = "New";
-  newOption.textContent = "New";
-  areaSelect.appendChild(newOption);
 
   // Add existing areas
   areas.forEach(a => {
@@ -354,6 +350,12 @@ function handleAreaChange() {
     areaSelect.appendChild(opt);
   });
 
+  // Add "New" option at the end
+  const newOption = document.createElement("option");
+  newOption.value = "New";
+  newOption.textContent = "New";
+  areaSelect.appendChild(newOption);
+
   // Restore previous value if still valid
   if (prevValue && (prevValue === "New" || areas.includes(prevValue))) {
     areaSelect.value = prevValue;
@@ -361,14 +363,16 @@ function handleAreaChange() {
     areaSelect.value = "New";
   }
 
-  // If an existing area is selected, fetch its data
+  // If an existing area is selected, fetch its data and update form
   if (areaSelect.value !== "New") {
-    fetchFormData(areaSelect.value).then(data => fillForm(data));
+    const data = await fetchFormData(areaSelect.value);
+    fillForm(data);
+    updateCoordinatorOptions(); // ensure coordinator dropdown updates
   } else {
     clearForm();
+    updateCoordinatorOptions();
   }
 }
-
 // ------------------- FILL FORM -------------------
 function fillForm(data) {
   if(!data) return;
