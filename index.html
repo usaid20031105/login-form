@@ -412,17 +412,17 @@ function fillForm(data) {
 });
 
   // --- MEMBERS ---
-  clearMembers();
-  const members = [];
-  let i=1;
+clearMembers();
+let i = 1;
 while (
   data[`Member ${i} Name`] ||
   data[`Member ${i} Contact`] ||
   data[`Member ${i} WhatsApp`] ||
   data[`Member ${i} Marital`] ||
-  data[`Member ${i} Status`]
+  data[`Member ${i} Status`] ||
+  data[`Member ${i} Photo URL`]
 ) {
-  members.push({
+  addMember({
     name: data[`Member ${i} Name`] || "",
     contact: data[`Member ${i} Contact`] || "",
     whatsapp: data[`Member ${i} WhatsApp`] || "",
