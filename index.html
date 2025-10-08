@@ -226,7 +226,7 @@
   // ===== UTIL =====
 async function postJSON(payload) {
   const query = encodeURIComponent(JSON.stringify(payload));
-  const url = ${API_URL}?data=${query};
+  const url = `${API_URL}?data=${query}`;
   try {
     const res = await fetch(url); // GET request, no body
     const text = await res.text();
