@@ -289,7 +289,18 @@ async function postJSON(payload) {
     el("submitBtn").addEventListener("click", submitForm);
     el("statusMsg").textContent = "";
   }
-
+// ===== FETCH EXISTING AREA DATA =====
+async function fetchFormData(areaName){
+  try {
+    const res = await postJSON({ action: "getFormData", area: areaName });
+    if(res && res.ok && res.data) return res.data;
+    console.warn("No data for area", areaName, res);
+    return null;
+  } catch(err){
+    console.error(err);
+    return null;
+  }
+}
   function populateSelect(id, list, addSelectOption = true) {
   const s = el(id);
   if (!s) return;
