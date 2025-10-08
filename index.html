@@ -410,7 +410,7 @@ function fillForm(data) {
     status: "President Status"
   };
   for (const [suffix, key] of Object.entries(pres)) {
-    const el = document.getElementById(`president-${suffix}`);
+    const el = document.getElementById(`president_${suffix}`);
     if (el) el.value = data[key] || "";
   }
 
@@ -423,7 +423,7 @@ function fillForm(data) {
     status: "Secretary Status"
   };
   for (const [suffix, key] of Object.entries(sec)) {
-    const el = document.getElementById(`secretary-${suffix}`);
+    const el = document.getElementById(`secretary_${suffix}`);
     if (el) el.value = data[key] || "";
   }
 
@@ -436,7 +436,7 @@ function fillForm(data) {
     status: "Treasurer Status"
   };
   for (const [suffix, key] of Object.entries(tre)) {
-    const el = document.getElementById(`treasurer-${suffix}`);
+    const el = document.getElementById(`treasurer_${suffix}`);
     if (el) el.value = data[key] || "";
   }
 
