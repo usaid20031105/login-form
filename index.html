@@ -225,21 +225,14 @@
 
   // ===== UTIL =====
 async function postJSON(payload) {
+  const query = encodeURIComponent(JSON.stringify(payload));
+  const url = ${API_URL}?data=${query};
   try {
-    const res = await fetch(API_URL, {
-      method: "GET", // or "POST" if using doPost
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const res = await fetch(url); // GET request, no body
     const text = await res.text();
-    console.log("POST to:", API_URL);
-    console.log("Payload:", payload);
+    console.log("GET to:", url);
     console.log("Response text:", text);
-    try {
-      return JSON.parse(text);
-    } catch (e) {
-      return { ok: false, error: "Invalid JSON from server", raw: text };
-    }
+    return JSON.parse(text);
   } catch (err) {
     console.error("Fetch error:", err);
     return { ok: false, error: err.message || "Network error" };
