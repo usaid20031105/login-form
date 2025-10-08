@@ -93,13 +93,16 @@
           <div>
             <label>Marital status</label>
             <select id="president_marital">
-              <option>Single</option><option>Married</option><option>Other</option>
+              <option value="">Select</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Other">Other</option>
             </select>
             <input id="president_marital_custom" class="custom-input hidden" placeholder="Enter custom marital status" />
           </div>
           <div>
             <label>Status</label>
-            <select id="president_status"><option>Active</option><option>Inactive</option><option>Other</option></select>
+            <select id="president_status"><option value="">Select</option><option>Active</option><option>Inactive</option><option>Other</option></select>
             <input id="president_status_custom" class="custom-input hidden" placeholder="Enter custom status" />
           </div>
         </div>
@@ -132,12 +135,16 @@
           </div>
           <div>
             <label>Marital status</label>
-            <select id="secretary_marital"><option>Single</option><option>Married</option><option>Other</option></select>
+            <select id="secretary_marital"><option value="">Select</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Other">Other</option>
+            </select>
             <input id="secretary_marital_custom" class="custom-input hidden" placeholder="Enter custom marital status" />
           </div>
           <div>
             <label>Status</label>
-            <select id="secretary_status"><option>Active</option><option>Inactive</option><option>Other</option></select>
+            <select id="secretary_status"><option value="">Select</option><option>Active</option><option>Inactive</option><option>Other</option></select>
             <input id="secretary_status_custom" class="custom-input hidden" placeholder="Enter custom status" />
           </div>
         </div>
@@ -170,12 +177,16 @@
           </div>
           <div>
             <label>Marital status</label>
-            <select id="treasurer_marital"><option>Single</option><option>Married</option><option>Other</option></select>
+            <select id="treasurer_marital"><option value="">Select</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Other">Other</option>
+            </select>
             <input id="treasurer_marital_custom" class="custom-input hidden" placeholder="Enter custom marital status" />
           </div>
           <div>
             <label>Status</label>
-            <select id="treasurer_status"><option>Active</option><option>Inactive</option><option>Other</option></select>
+            <select id="treasurer_status"><option value="">Select</option><option>Active</option><option>Inactive</option><option>Other</option></select>
             <input id="treasurer_status_custom" class="custom-input hidden" placeholder="Enter custom status" />
           </div>
         </div>
@@ -371,12 +382,16 @@ async function postJSON(payload) {
         <div><label>Whatsapp No</label><input class="m-whatsapp" value="${escapeHtml(existing.whatsapp||'')}" /></div>
         <div>
           <label>Marital status</label>
-          <select class="m-marital"><option>Single</option><option>Married</option><option>Other</option></select>
+          <select class="m-marital"><option value="">Select</option>
+          <option value="Single">Single</option>
+          <option value="Married">Married</option>
+          <option value="Other">Other</option>
+        </select>
           <input class="m-marital-custom custom-input hidden" placeholder="Enter custom marital status" />
         </div>
         <div>
           <label>Status</label>
-          <select class="m-status"><option>Active</option><option>Inactive</option><option>Other</option></select>
+          <select class="m-status"><option value="">Select</option><option>Active</option><option>Inactive</option><option>Other</option></select>
           <input class="m-status-custom custom-input hidden" placeholder="Enter custom status" />
         </div>
       </div>
