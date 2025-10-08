@@ -322,6 +322,11 @@ function updateAreas(){
   areas.push("New"); // always allow New
   populateSelect("area", areas);
 }
+// Event listeners for live updates
+el("zone")?.addEventListener("change", () => { updateProvinces(); });
+el("province")?.addEventListener("change", () => { updateDistricts(); });
+el("district")?.addEventListener("change", () => { updateAreas(); });
+el("area")?.addEventListener("change", handleAreaChange);    
 
 // ===== AREA change handling =====
 async function handleAreaChange(){
