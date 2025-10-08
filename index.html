@@ -290,75 +290,111 @@ async function postJSON(payload) {
     el("statusMsg").textContent = "";
   }
 
-  function populateSelect(id, list){ const s=el(id); if(!s)return; s.innerHTML=""; (list||[]).forEach(v => { const o = create("option"); o.value=v; o.textContent=v; s.appendChild(o); }); }
+  function populateSelect(id, list){
+  const s = el(id);
+  if(!s) return;
+  s.innerHTML = "";
+  (list||[]).forEach(v => {
+    const o = create("option");
+    o.value = v;
+    o.textContent = v;
+    s.appendChild(o);
+  });
+}
 
-  function updateProvinces(){
-    const z = el("zone").value;
-    populateSelect("province", dropdowns.provinces[z] || []);
-    updateDistricts();
-  }
-  function updateDistricts(){
-    const p = el("province").value;
-    populateSelect("district", dropdowns.districts[p] || []);
-  }
+// ===== ZONE / PROVINCE / DISTRICT =====
+function updateProvinces(){
+  const z = el("zone").value;
+  populateSelect("province", dropdowns.provinces[z] || []);
+  updateDistricts();
+}
 
-  // ===== AREA change handling =====
-  async function handleAreaChange(){
-    const a = el("area").value;
-    if(a === "New"){
-      el("newAreaDiv").classList.remove("hidden");
-      clearForm(false);
+function updateDistricts(){
+  const p = el("province").value;
+  populateSelect("district", dropdowns.districts[p] || []);
+  updateAreas(); // <-- update Areas whenever district changes
+}
+
+// ===== AREA Dropdown dependent on District =====
+function updateAreas(){
+  const district = el("district").value;
+  const areas = dropdowns.districtToAreas[district] || [];
+  areas.push("New"); // always allow New
+  populateSelect("area", areas);
+}
+
+// ===== AREA change handling =====
+async function handleAreaChange(){
+  const a = el("area").value;
+  if(a === "New"){
+    el("newAreaDiv").classList.remove("hidden");
+    clearForm(false);
+  } else {
+    el("newAreaDiv").classList.add("hidden");
+    const res = await postJSON({ action:"getFormData", area: a });
+    if(res && res.ok && res.data){
+      fillForm(res.data);
     } else {
-      el("newAreaDiv").classList.add("hidden");
-      const res = await postJSON({ action:"getFormData", area: a });
-      if(res && res.ok && res.data){ fillForm(res.data); }
-      else { clearForm(false); el("statusMsg").textContent = "No data for selected area"; }
+      clearForm(false);
+      el("statusMsg").textContent = "No data for selected area";
     }
   }
+}
 
-  // ===== FILL / CLEAR FORM =====
-  function fillForm(data){
-    if(!data) return;
-    // location
-    el("zone").value = data.Zone || "";
-    updateProvinces();
-    el("province").value = data.Province || "";
-    updateDistricts();
-    el("district").value = data.District || "";
-    el("area").value = data.Area || "";
+// ===== FILL / CLEAR FORM =====
+function fillForm(data){
+  if(!data) return;
 
-    // president
-    el("president_name").value = data["President Name"] || "";
-    el("president_contact").value = data["President Contact"] || "";
-    el("president_whatsapp").value = data["President WhatsApp"] || "";
-    setSelectOrCustom("president","marital", data["President Marital"] || "");
-    setSelectOrCustom("president","status", data["President Status"] || "");
-    if(data["President Photo URL"]) { el("president_photo_preview").src = data["President Photo URL"]; el("president_photo_preview").dataset.base64 = ""; }
+  // location
+  el("zone").value = data.Zone || "";
+  updateProvinces();
+  el("province").value = data.Province || "";
+  updateDistricts();
+  el("district").value = data.District || "";
+  updateAreas();
+  el("area").value = data.Area || "";
 
-    // secretary
-    el("secretary_name").value = data["Secretary Name"] || "";
-    el("secretary_contact").value = data["Secretary Contact"] || "";
-    el("secretary_whatsapp").value = data["Secretary WhatsApp"] || "";
-    setSelectOrCustom("secretary","marital", data["Secretary Marital"] || "");
-    setSelectOrCustom("secretary","status", data["Secretary Status"] || "");
-    if(data["Secretary Photo URL"]) { el("secretary_photo_preview").src = data["Secretary Photo URL"]; el("secretary_photo_preview").dataset.base64 = ""; }
-
-    // treasurer
-    el("treasurer_name").value = data["Treasurer Name"] || "";
-    el("treasurer_contact").value = data["Treasurer Contact"] || "";
-    el("treasurer_whatsapp").value = data["Treasurer WhatsApp"] || "";
-    setSelectOrCustom("treasurer","marital", data["Treasurer Marital"] || "");
-    setSelectOrCustom("treasurer","status", data["Treasurer Status"] || "");
-    if(data["Treasurer Photo URL"]) { el("treasurer_photo_preview").src = data["Treasurer Photo URL"]; el("treasurer_photo_preview").dataset.base64 = ""; }
-
-    // coordinator
-    el("coordinator").value = data["Coordinator"] || "President";
-
-    // members: clear then populate
-    clearMembers();
-    const members = data.members || [];
-    members.forEach(m => addMember(m));
+  // president
+  el("president_name").value = data["President Name"] || "";
+  el("president_contact").value = data["President Contact"] || "";
+  el("president_whatsapp").value = data["President WhatsApp"] || "";
+  setSelectOrCustom("president","marital", data["President Marital"] || "");
+  setSelectOrCustom("president","status", data["President Status"] || "");
+  if(data["President Photo URL"]){
+    el("president_photo_preview").src = data["President Photo URL"];
+    el("president_photo_preview").dataset.base64 = "";
   }
+
+  // secretary
+  el("secretary_name").value = data["Secretary Name"] || "";
+  el("secretary_contact").value = data["Secretary Contact"] || "";
+  el("secretary_whatsapp").value = data["Secretary WhatsApp"] || "";
+  setSelectOrCustom("secretary","marital", data["Secretary Marital"] || "");
+  setSelectOrCustom("secretary","status", data["Secretary Status"] || "");
+  if(data["Secretary Photo URL"]){
+    el("secretary_photo_preview").src = data["Secretary Photo URL"];
+    el("secretary_photo_preview").dataset.base64 = "";
+  }
+
+  // treasurer
+  el("treasurer_name").value = data["Treasurer Name"] || "";
+  el("treasurer_contact").value = data["Treasurer Contact"] || "";
+  el("treasurer_whatsapp").value = data["Treasurer WhatsApp"] || "";
+  setSelectOrCustom("treasurer","marital", data["Treasurer Marital"] || "");
+  setSelectOrCustom("treasurer","status", data["Treasurer Status"] || "");
+  if(data["Treasurer Photo URL"]){
+    el("treasurer_photo_preview").src = data["Treasurer Photo URL"];
+    el("treasurer_photo_preview").dataset.base64 = "";
+  }
+
+  // coordinator
+  el("coordinator").value = data["Coordinator"] || "President";
+
+  // members: clear then populate
+  clearMembers();
+  const members = data.members || [];
+  members.forEach(m => addMember(m));
+}
 
   function clearForm(clearArea = true){
     if(clearArea){ el("zone").selectedIndex = 0; updateProvinces(); }
