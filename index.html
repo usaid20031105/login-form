@@ -403,9 +403,6 @@ function fillForm(data) {
     el("treasurer_photo_preview").dataset.base64 = "";
   }
 
-  // --- COORDINATOR ---
-  el("coordinator").value = data["Coordinator"] || "President";
-
   // --- MEMBERS ---
   clearMembers();
   const members = [];
@@ -418,24 +415,26 @@ function fillForm(data) {
     data[`Member ${i} Status`]
   ) {
     members.push({
-      name: data[`Member ${i} Name`] || "",
-      contact: data[`Member ${i} Contact`] || "",
-      whatsapp: data[`Member ${i} WhatsApp`] || "",
-      marital: data[`Member ${i} Marital`] || "",
-      status: data[`Member ${i} Status`] || "",
-      photoUrl: data[`Member ${i} Photo URL`] || ""
+      name: String(data[`Member ${i} Name`] || ""),
+      contact: String(data[`Member ${i} Contact`] || ""),
+      whatsapp: String(data[`Member ${i} WhatsApp`] || ""),
+      marital: String(data[`Member ${i} Marital`] || ""),
+      status: String(data[`Member ${i} Status`] || ""),
+      photoUrl: String(data[`Member ${i} Photo URL`] || "")
     });
     i++;
   }
   members.forEach((m) => addMember(m));
+
+  // --- COORDINATOR ---
+  updateCoordinatorOptions();
+  el("coordinator").value = data["Coordinator"] || "President";
 
   // --- Wire live coordinator updates ---
   ["president_name", "secretary_name", "treasurer_name"].forEach((id) => {
     const elInput = el(id);
     if (elInput) elInput.addEventListener("input", updateCoordinatorOptions);
   });
-   // --- Coordinator ---
-  updateCoordinatorOptions();
 }
   function updateCoordinatorOptions() {
   const coordinatorSelect = el("coordinator");
@@ -484,17 +483,25 @@ function fillForm(data) {
   updateCoordinatorOptions(); // clear coordinator options too
 }
 
- function addMember(existing = {}) {
+function addMember(existing = {}) {
   memberIndex++;
-  const root = create("div"); 
-  root.className = "member-block"; 
+  const root = document.createElement("div");
+  root.className = "member-block";
   root.dataset.index = memberIndex;
+
+  // Ensure all values are strings for escapeHtml
+  const name = existing.name ? String(existing.name) : "";
+  const contact = existing.contact ? String(existing.contact) : "";
+  const whatsapp = existing.whatsapp ? String(existing.whatsapp) : "";
+  const marital = existing.marital ? String(existing.marital) : "";
+  const status = existing.status ? String(existing.status) : "";
+  const photoUrl = existing.photoUrl ? String(existing.photoUrl) : "";
 
   root.innerHTML = `
     <div class="grid">
-      <div><label>Full name</label><input class="m-name" value="${escapeHtml(existing.name||'')}" /></div>
-      <div><label>Contact No</label><input class="m-contact" value="${escapeHtml(existing.contact||'')}" /></div>
-      <div><label>Whatsapp No</label><input class="m-whatsapp" value="${escapeHtml(existing.whatsapp||'')}" /></div>
+      <div><label>Full name</label><input class="m-name" value="${escapeHtml(name)}" /></div>
+      <div><label>Contact No</label><input class="m-contact" value="${escapeHtml(contact)}" /></div>
+      <div><label>Whatsapp No</label><input class="m-whatsapp" value="${escapeHtml(whatsapp)}" /></div>
       <div>
         <label>Marital status</label>
         <select class="m-marital"><option value="">Select</option>
@@ -523,24 +530,26 @@ function fillForm(data) {
       <button class="btn danger remove-member" type="button">Remove Member</button>
     </div>
   `;
-  
+
   el("members").appendChild(root);
 
-  // Set existing values
-  if(existing.marital){ 
-    const sel = root.querySelector(".m-marital"); 
-    if(Array.from(sel.options).some(o=>o.value===existing.marital)) sel.value=existing.marital; 
-    else { sel.value="Other"; const cust = root.querySelector(".m-marital-custom"); cust.classList.remove("hidden"); cust.value = existing.marital; } 
+  // Set existing values for selects and photos
+  if (marital) {
+    const sel = root.querySelector(".m-marital");
+    if (Array.from(sel.options).some(o => o.value === marital)) sel.value = marital;
+    else { sel.value = "Other"; const cust = root.querySelector(".m-marital-custom"); cust.classList.remove("hidden"); cust.value = marital; }
   }
-  if(existing.status){ 
-    const sel = root.querySelector(".m-status"); 
-    if(Array.from(sel.options).some(o=>o.value===existing.status)) sel.value=existing.status; 
-    else { sel.value="Other"; const cust = root.querySelector(".m-status-custom"); cust.classList.remove("hidden"); cust.value = existing.status; } 
+
+  if (status) {
+    const sel = root.querySelector(".m-status");
+    if (Array.from(sel.options).some(o => o.value === status)) sel.value = status;
+    else { sel.value = "Other"; const cust = root.querySelector(".m-status-custom"); cust.classList.remove("hidden"); cust.value = status; }
   }
-  if(existing.photoUrl){ 
-    const prev = root.querySelector(".m-photo-preview"); 
-    prev.src = existing.photoUrl; 
-    prev.dataset.base64 = ""; 
+
+  if (photoUrl) {
+    const prev = root.querySelector(".m-photo-preview");
+    prev.src = photoUrl;
+    prev.dataset.base64 = "";
   }
 
   // Wire custom selects and photo controls
@@ -550,16 +559,13 @@ function fillForm(data) {
   // Remove button
   root.querySelector(".remove-member").addEventListener("click", () => {
     root.remove();
-    updateCoordinatorOptions(); // refresh coordinator after removal
+    updateCoordinatorOptions();
   });
 
-  // Update coordinator dropdown whenever this member name changes
+  // Update coordinator whenever member name changes
   const nameInput = root.querySelector(".m-name");
-  if(nameInput){
-    nameInput.addEventListener("input", updateCoordinatorOptions);
-  }
+  if (nameInput) nameInput.addEventListener("input", updateCoordinatorOptions);
 
-  // Refresh coordinator after adding new member
   updateCoordinatorOptions();
 }
 
