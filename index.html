@@ -388,49 +388,65 @@ async function handleAreaChange() {
 function fillForm(data) {
   if(!data) return;
 
-  // --- LOCATION ---
-  el("zone").value = data.Zone || "";
-  updateProvinces();
-  el("province").value = data.Province || "";
-  updateDistricts();
-  el("district").value = data.District || "";
-  updateAreas();
-  el("area").value = data.Area || "";
+  // Fill main fields
+  document.getElementById("zone").value = data.Zone || "";
+  document.getElementById("province").value = data.Province || "";
+  document.getElementById("district").value = data.District || "";
+  document.getElementById("area").value = data.Area || "";
 
-  // --- OFFICERS ---
-  ["president", "secretary", "treasurer"].forEach(role => {
-  el(`${role}_name`).value = data[`${capitalize(role)} Name`] || "";
-  el(`${role}_contact`).value = data[`${capitalize(role)} Contact`] || "";
-  el(`${role}_whatsapp`).value = data[`${capitalize(role)} WhatsApp`] || "";
-  setSelectOrCustom(role, "marital", data[`${capitalize(role)} Marital`] || "");
-  setSelectOrCustom(role, "status", data[`${capitalize(role)} Status`] || "");
-  if (data[`${capitalize(role)} Photo URL`]) {
-    const preview = el(`${role}_photo_preview`);
-    preview.src = data[`${capitalize(role)} Photo URL`];
-    preview.dataset.base64 = "";
+  document.getElementById("president-name").value = data["President Name"] || "";
+  document.getElementById("president-contact").value = data["President Contact"] || "";
+  document.getElementById("president-whatsapp").value = data["President WhatsApp"] || "";
+  document.getElementById("president-marital").value = data["President Marital"] || "";
+  document.getElementById("president-status").value = data["President Status"] || "";
+
+  document.getElementById("secretary-name").value = data["Secretary Name"] || "";
+  document.getElementById("secretary-contact").value = data["Secretary Contact"] || "";
+  document.getElementById("secretary-whatsapp").value = data["Secretary WhatsApp"] || "";
+  document.getElementById("secretary-marital").value = data["Secretary Marital"] || "";
+  document.getElementById("secretary-status").value = data["Secretary Status"] || "";
+
+  document.getElementById("treasurer-name").value = data["Treasurer Name"] || "";
+  document.getElementById("treasurer-contact").value = data["Treasurer Contact"] || "";
+  document.getElementById("treasurer-whatsapp").value = data["Treasurer WhatsApp"] || "";
+  document.getElementById("treasurer-marital").value = data["Treasurer Marital"] || "";
+  document.getElementById("treasurer-status").value = data["Treasurer Status"] || "";
+
+  document.getElementById("coordinator").value = data["Coordinator"] || "";
+
+  // Clear existing members
+  const membersContainer = document.getElementById("members");
+  membersContainer.innerHTML = "";
+  memberIndex = 0;
+
+  // Add pre-filled members from "Member 1 Name", "Member 2 Name"…
+  for(let i=1; i<=10; i++) { // assuming max 10 members, adjust if needed
+    const nameKey = `Member ${i} Name`;
+    if(data[nameKey] && data[nameKey].trim() !== "") {
+      addMember({
+        name: data[`Member ${i} Name`] || "",
+        contact: data[`Member ${i} Contact`] || "",
+        whatsapp: data[`Member ${i} WhatsApp`] || "",
+        marital: data[`Member ${i} Marital`] || "",
+        status: data[`Member ${i} Status`] || "",
+        photoUrl: data[`Member ${i} Photo URL`] || ""
+      });
+    }
   }
-});
 
-  // --- MEMBERS ---
-clearMembers();
-let i = 1;
-while (
-  data[`Member ${i} Name`] ||
-  data[`Member ${i} Contact`] ||
-  data[`Member ${i} WhatsApp`] ||
-  data[`Member ${i} Marital`] ||
-  data[`Member ${i} Status`] ||
-  data[`Member ${i} Photo URL`]
-) {
-  addMember({
-    name: data[`Member ${i} Name`] || "",
-    contact: data[`Member ${i} Contact`] || "",
-    whatsapp: data[`Member ${i} WhatsApp`] || "",
-    marital: data[`Member ${i} Marital`] || "",
-    status: data[`Member ${i} Status`] || "",
-    photoUrl: data[`Member ${i} Photo URL`] || ""
-  });
-  i++;
+  // Add extra members from "members" array if exists
+  if(Array.isArray(data.members)) {
+    data.members.forEach(m=>{
+      addMember({
+        name: m.name || "",
+        contact: m.contact || "",
+        whatsapp: m.whatsapp || "",
+        marital: m.marital || "",
+        status: m.status || "",
+        photoUrl: m.photoUrl || ""
+      });
+    });
+  }
 }
   members.forEach(m=>addMember(m));
 
@@ -501,6 +517,7 @@ function capitalize(str){
   updateCoordinatorOptions(); // clear coordinator options too
 }
 // ------------------- ADD MEMBER -------------------
+// Add member dynamically
 function addMember(existing = {}) {
   memberIndex++;
   const root = document.createElement("div");
@@ -554,7 +571,7 @@ function addMember(existing = {}) {
 
   document.getElementById("members").appendChild(root);
 
-  // Set existing values
+  // Pre-fill existing values
   if(existing.marital){ 
     const sel = root.querySelector(".m-marital"); 
     if([...sel.options].some(o=>o.value===existing.marital)) sel.value=existing.marital; 
@@ -584,7 +601,33 @@ function addMember(existing = {}) {
   const nameInput = root.querySelector(".m-name");
   if(nameInput) nameInput.addEventListener("input", updateCoordinatorOptions);
 
-  updateCoordinatorOptions();
+  updateCoordinatorOptions(); // Sync coordinator dropdown immediately
+}
+
+// Sync coordinator dropdown with all member names
+function updateCoordinatorOptions() {
+  const coordSelect = document.getElementById("coordinator");
+  if(!coordSelect) return;
+
+  // Keep current selection
+  const currentVal = coordSelect.value;
+
+  // Get all member names
+  const memberNames = Array.from(document.querySelectorAll(".m-name"))
+    .map(input => input.value.trim())
+    .filter(name => name.length);
+
+  // Clear and repopulate dropdown
+  coordSelect.innerHTML = `<option value="">Select Coordinator</option>`;
+  memberNames.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    coordSelect.appendChild(opt);
+  });
+
+  // Restore previous selection if still valid
+  if(memberNames.includes(currentVal)) coordSelect.value = currentVal;
 }
   // ===== CUSTOM SELECTS (Other -> custom input) =====
   function initRoleCustomSelects(){
