@@ -383,17 +383,18 @@ function fillForm(data) {
   el("area").value = data.Area || "";
 
   // --- OFFICERS ---
-  ["president","secretary","treasurer"].forEach(role=>{
-    el(${role}_name).value = data[${capitalize(role)} Name] || "";
-    el(${role}_contact).value = data[${capitalize(role)} Contact] || "";
-    el(${role}_whatsapp).value = data[${capitalize(role)} WhatsApp] || "";
-    setSelectOrCustom(role,"marital",data[${capitalize(role)} Marital] || "");
-    setSelectOrCustom(role,"status",data[${capitalize(role)} Status] || "");
-    if(data[${capitalize(role)} Photo URL]){
-      el(${role}_photo_preview).src = data[${capitalize(role)} Photo URL];
-      el(${role}_photo_preview).dataset.base64 = "";
-    }
-  });
+  ["president", "secretary", "treasurer"].forEach(role => {
+  el(`${role}_name`).value = data[`${capitalize(role)} Name`] || "";
+  el(`${role}_contact`).value = data[`${capitalize(role)} Contact`] || "";
+  el(`${role}_whatsapp`).value = data[`${capitalize(role)} WhatsApp`] || "";
+  setSelectOrCustom(role, "marital", data[`${capitalize(role)} Marital`] || "");
+  setSelectOrCustom(role, "status", data[`${capitalize(role)} Status`] || "");
+  if (data[`${capitalize(role)} Photo URL`]) {
+    const preview = el(`${role}_photo_preview`);
+    preview.src = data[`${capitalize(role)} Photo URL`];
+    preview.dataset.base64 = "";
+  }
+});
 
   // --- MEMBERS ---
   clearMembers();
